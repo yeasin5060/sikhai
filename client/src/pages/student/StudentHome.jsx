@@ -13,7 +13,7 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import { formatPrice } from '../../utils/formatters.js';
+import { formatDigits, formatNumber, formatPrice } from '../../utils/formatters.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
 
 export default function StudentHome({
@@ -49,19 +49,23 @@ export default function StudentHome({
         ease: 'power2.out',
       });
 
-      gsap.utils.toArray('.stats-strip, .section-heading, .why-image, .why-copy, .story-card, .cta > div, .cta > a').forEach((element) => {
-        gsap.from(element, {
-          y: 30,
-          autoAlpha: 0,
-          duration: 0.7,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: element,
-            start: 'top 88%',
-            once: true,
-          },
+      gsap.utils
+        .toArray(
+          '.stats-strip, .section-heading, .why-image, .why-copy, .story-card, .cta > div, .cta > a',
+        )
+        .forEach((element) => {
+          gsap.from(element, {
+            y: 30,
+            autoAlpha: 0,
+            duration: 0.7,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: element,
+              start: 'top 88%',
+              once: true,
+            },
+          });
         });
-      });
 
       gsap.utils.toArray('.course-card').forEach((card) => {
         gsap.from(card, {
@@ -119,7 +123,14 @@ export default function StudentHome({
           {user ? (
             <>
               <span className="user-name">{user.name}</span>
-              {!isAdmin && <button className="button button-light" onClick={() => navigate('/dashboard')}>ড্যাশবোর্ড</button>}
+              {!isAdmin && (
+                <button
+                  className="button button-light"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  ড্যাশবোর্ড
+                </button>
+              )}
               {isAdmin && (
                 <button
                   className="button button-light"
@@ -254,7 +265,7 @@ export default function StudentHome({
               </p>
             </div>
             <div className="course-count">
-              <b>{courses.length.toLocaleString('bn-BD')}</b>
+              <b className="number-display">{formatNumber(courses.length)}</b>
               <span>টি কোর্স</span>
             </div>
           </div>
@@ -296,12 +307,25 @@ export default function StudentHome({
                   <span className="course-online">অনলাইন · অফলাইন</span>
                 </div>
                 <div className="course-body">
-                  <h3><a className="course-title-link" href={`/courses/${c.id}`} onClick={(event) => { event.preventDefault(); navigate(`/courses/${c.id}`); }}>{c.name}</a></h3>
+                  <h3>
+                    <a
+                      className="course-title-link"
+                      href={`/courses/${c.id}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        navigate(`/courses/${c.id}`);
+                      }}
+                    >
+                      {c.name}
+                    </a>
+                  </h3>
                   <p>{c.description}</p>
                   <div className="course-info">
-                    <span>◷ {c.duration}</span>
+                    <span>◷ {formatDigits(c.duration)}</span>
                     <span>
-                      ♧ {Number(c.students || 0).toLocaleString('bn-BD')}+ শিক্ষার্থী
+                      ♧{' '}
+                      <span className="number-display">{formatNumber(c.students)}+</span>{' '}
+                      শিক্ষার্থী
                     </span>
                   </div>
                   <div className="course-footer">
@@ -310,11 +334,21 @@ export default function StudentHome({
                       <del>{formatPrice(c.offlinePrice)}</del>
                     </div>
                     <button
-                      className={enrolledIds.includes(c.id) ? 'button button-light' : 'circle-arrow'}
+                      className={
+                        enrolledIds.includes(c.id)
+                          ? 'button button-light'
+                          : 'circle-arrow'
+                      }
                       onClick={() => onEnroll(c.id)}
-                      aria-label={enrolledIds.includes(c.id) ? 'ড্যাশবোর্ডে দেখুন' : 'কোর্সে ভর্তি'}
+                      aria-label={
+                        enrolledIds.includes(c.id) ? 'ড্যাশবোর্ডে দেখুন' : 'কোর্সে ভর্তি'
+                      }
                     >
-                      {enrolledIds.includes(c.id) ? 'ড্যাশবোর্ডে যোগ হয়েছে' : <ArrowRight size={18} />}
+                      {enrolledIds.includes(c.id) ? (
+                        'ড্যাশবোর্ডে যোগ হয়েছে'
+                      ) : (
+                        <ArrowRight size={18} />
+                      )}
                     </button>
                   </div>
                 </div>

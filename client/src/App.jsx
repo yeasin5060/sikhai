@@ -8,11 +8,13 @@ import { starterCourses } from './data/courses.js';
 import {
   clearUser,
   getAccounts,
+  getAdminProfile,
   getAllStudentEnrollments,
   getSavedCourses,
   getSavedUser,
   getStudentEnrollments,
   saveCourses,
+  saveAdminProfile,
   saveUser,
   saveStudentEnrollments,
 } from './utils/storage.js';
@@ -28,7 +30,9 @@ function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [user, setUser] = useState(getSavedUser);
   const [courses, setCourses] = useState(() => getSavedCourses(starterCourses));
-  const [enrolledIds, setEnrolledIds] = useState(() => getStudentEnrollments(getSavedUser()?.email));
+  const [enrolledIds, setEnrolledIds] = useState(() =>
+    getStudentEnrollments(getSavedUser()?.email),
+  );
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('সব');
   const [mobileNav, setMobileNav] = useState(false);
@@ -74,10 +78,19 @@ function App() {
   };
 
   const handleAuth = (authenticatedUser, redirectTo) => {
-    setUser(authenticatedUser);
-    saveUser(authenticatedUser);
-    setEnrolledIds(getStudentEnrollments(authenticatedUser.email));
+    const profile = authenticatedUser.role === 'admin' ? getAdminProfile() : {};
+    const signedInUser = { ...authenticatedUser, ...profile };
+    setUser(signedInUser);
+    saveUser(signedInUser);
+    setEnrolledIds(getStudentEnrollments(signedInUser.email));
     navigate(redirectTo);
+  };
+
+  const updateAdminProfile = (profile) => {
+    const updatedUser = { ...user, ...profile };
+    setUser(updatedUser);
+    saveUser(updatedUser);
+    saveAdminProfile(profile);
   };
 
   const enrollInCourse = (courseId) => {
@@ -144,6 +157,7 @@ function App() {
         setCourses={setCourses}
         accounts={getAccounts()}
         enrollments={getAllStudentEnrollments()}
+        onProfileUpdate={updateAdminProfile}
         onLogout={logout}
         onNavigate={navigate}
         theme={theme}
@@ -154,22 +168,67 @@ function App() {
 
   if (path === '/dashboard') {
     if (!user) {
-      return <AuthPage mode="login" onNavigate={navigate} theme={theme} onToggleTheme={toggleTheme}
-        onAuth={(authenticatedUser) => handleAuth(authenticatedUser, authenticatedUser.role === 'admin' ? '/admin' : '/dashboard')} />;
+      return (
+        <AuthPage
+          mode="login"
+          onNavigate={navigate}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onAuth={(authenticatedUser) =>
+            handleAuth(
+              authenticatedUser,
+              authenticatedUser.role === 'admin' ? '/admin' : '/dashboard',
+            )
+          }
+        />
+      );
     }
-    if (isAdmin) return <AdminPage user={user} courses={courses} setCourses={setCourses}
-      accounts={getAccounts()} enrollments={getAllStudentEnrollments()}
-      onLogout={logout} onNavigate={navigate} theme={theme} onToggleTheme={toggleTheme} />;
-    return <StudentDashboard user={user} courses={courses} enrolledIds={enrolledIds}
-      onBrowse={() => navigate('/')} onNavigate={navigate} onEnroll={enrollInCourse}
-      onLogout={logout} theme={theme} onToggleTheme={toggleTheme} />;
+    if (isAdmin)
+      return (
+        <AdminPage
+          user={user}
+          courses={courses}
+          setCourses={setCourses}
+          accounts={getAccounts()}
+          enrollments={getAllStudentEnrollments()}
+          onProfileUpdate={updateAdminProfile}
+          onLogout={logout}
+          onNavigate={navigate}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      );
+    return (
+      <StudentDashboard
+        user={user}
+        courses={courses}
+        enrolledIds={enrolledIds}
+        onBrowse={() => navigate('/')}
+        onNavigate={navigate}
+        onEnroll={enrollInCourse}
+        onLogout={logout}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    );
   }
 
   const courseDetailMatch = path.match(/^\/courses\/([^/]+)$/);
   if (courseDetailMatch) {
     const course = courses.find((item) => String(item.id) === courseDetailMatch[1]);
-    if (course) return <CourseDetails course={course} allCourses={courses} user={user} enrolledIds={enrolledIds}
-      onNavigate={navigate} onEnroll={enrollInCourse} theme={theme} onToggleTheme={toggleTheme} />;
+    if (course)
+      return (
+        <CourseDetails
+          course={course}
+          allCourses={courses}
+          user={user}
+          enrolledIds={enrolledIds}
+          onNavigate={navigate}
+          onEnroll={enrollInCourse}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      );
   }
 
   return (
