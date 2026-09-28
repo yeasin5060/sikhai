@@ -19,8 +19,8 @@ export default function AuthPage({
   function submit(e) {
     e.preventDefault();
     setError('');
-    if (email.trim().toLowerCase() === 'admin@sikhai.com' && password === 'sikhai1234@') {
-      onAuth({ name: 'অ্যাডমিন', email: 'admin@sikhai.com', role: 'admin' });
+    if (email.trim().toLowerCase() === 'admin@gmail.com' && password === 'admin123@') {
+      onAuth({ name: 'অ্যাডমিন', email: 'admin@gmail.com', role: 'admin' });
       return;
     }
     if (login) {

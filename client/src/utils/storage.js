@@ -16,6 +16,21 @@ function readJson(key, fallback) {
 export const getAccounts = () => readJson(STORAGE_KEYS.accounts, []);
 export const getSavedUser = () => readJson(STORAGE_KEYS.user, null);
 export const getSavedCourses = (fallback) => readJson(STORAGE_KEYS.courses, fallback);
+export const getStudentEnrollments = (email) =>
+  readJson('sikhai_enrollments', {})[email?.toLowerCase()] || [];
+export const getAllStudentEnrollments = () => readJson('sikhai_enrollments', {});
+export const getStudentFavorites = (email) =>
+  readJson('sikhai_favorites', {})[email?.toLowerCase()] || [];
+export const saveStudentFavorites = (email, courseIds) => {
+  const favorites = readJson('sikhai_favorites', {});
+  favorites[email.toLowerCase()] = courseIds;
+  localStorage.setItem('sikhai_favorites', JSON.stringify(favorites));
+};
+export const saveStudentEnrollments = (email, courseIds) => {
+  const enrollments = readJson('sikhai_enrollments', {});
+  enrollments[email.toLowerCase()] = courseIds;
+  localStorage.setItem('sikhai_enrollments', JSON.stringify(enrollments));
+};
 
 export const saveAccounts = (accounts) =>
   localStorage.setItem(STORAGE_KEYS.accounts, JSON.stringify(accounts));

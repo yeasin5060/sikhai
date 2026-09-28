@@ -8,16 +8,21 @@ import {
   LayoutDashboard,
   LogOut,
   Plus,
+  ChartNoAxesColumn,
   Users,
   X,
 } from 'lucide-react';
 import CourseTable from './CourseTable.jsx';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
+import StudentManagement from './StudentManagement.jsx';
+import AnalyticsPage from './AnalyticsPage.jsx';
 
 export default function AdminPage({
   user,
   courses,
   setCourses,
+  accounts = [],
+  enrollments = {},
   onLogout,
   onNavigate,
   theme,
@@ -34,6 +39,11 @@ export default function AdminPage({
       students: '০',
       description: '',
       image: '',
+      instructor: '',
+      level: '',
+      prerequisites: '',
+      learningOutcomes: '',
+      curriculum: '',
     }),
     [notice, setNotice] = useState('');
   const set = (k, v) => setForm({ ...form, [k]: v });
@@ -46,6 +56,8 @@ export default function AdminPage({
         onlinePrice: Number(form.onlinePrice),
         offlinePrice: Number(form.offlinePrice),
         students: Number(form.students) || 0,
+        learningOutcomes: form.learningOutcomes.split('\n').map((item) => item.trim()).filter(Boolean),
+        curriculum: form.curriculum.split('\n').map((item) => item.trim()).filter(Boolean),
         image:
           form.image ||
           'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
@@ -61,6 +73,11 @@ export default function AdminPage({
       students: '০',
       description: '',
       image: '',
+      instructor: '',
+      level: '',
+      prerequisites: '',
+      learningOutcomes: '',
+      curriculum: '',
     });
     setShowForm(false);
     setNotice('নতুন কোর্স প্রকাশ করা হয়েছে।');
@@ -95,6 +112,12 @@ export default function AdminPage({
         >
           <BookOpen size={18} /> কোর্সসমূহ <span>{courses.length}</span>
         </button>
+        <button className={tab === 'students' ? 'side-link selected' : 'side-link'} onClick={() => setTab('students')}>
+          <Users size={18} /> শিক্ষার্থী <span>{accounts.length}</span>
+        </button>
+        <button className={tab === 'analytics' ? 'side-link selected' : 'side-link'} onClick={() => setTab('analytics')}>
+          <ChartNoAxesColumn size={18} /> অ্যানালিটিক্স
+        </button>
         <div className="sidebar-bottom">
           <div className="admin-profile">
             <span className="profile-avatar">অ</span>
@@ -117,7 +140,7 @@ export default function AdminPage({
             <span className="breadcrumb">
               শিখাই <ChevronRight size={14} /> অ্যাডমিন
             </span>
-            <h1>{tab === 'overview' ? 'ড্যাশবোর্ড' : 'কোর্স ব্যবস্থাপনা'}</h1>
+            <h1>{{ overview: 'ড্যাশবোর্ড', courses: 'কোর্স ব্যবস্থাপনা', students: 'শিক্ষার্থী', analytics: 'অ্যানালিটিক্স' }[tab]}</h1>
           </div>
           <div className="admin-top-right">
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
@@ -160,12 +183,9 @@ export default function AdminPage({
                   </span>
                   <small>মোট শিক্ষার্থী</small>
                   <b>
-                    {courses
-                      .reduce((a, c) => a + Number(c.students || 0), 0)
-                      .toLocaleString('bn-BD')}
-                    +
+                    {accounts.length.toLocaleString('bn-BD')}
                   </b>
-                  <span className="stat-foot">কোর্সে নিবন্ধিত</span>
+                  <span className="stat-foot">রেজিস্টার করা অ্যাকাউন্ট</span>
                 </div>
                 <div className="admin-stat">
                   <span className="stat-symbol orange">
@@ -197,7 +217,7 @@ export default function AdminPage({
                 />
               </section>
             </>
-          ) : (
+          ) : tab === 'courses' ? (
             <section className="admin-table-card course-manager">
               <div className="table-heading">
                 <div>
@@ -307,6 +327,26 @@ export default function AdminPage({
                         placeholder="কোর্সে কী শিখবেন লিখুন"
                       />
                     </label>
+                    <label>
+                      প্রশিক্ষকের নাম
+                      <input value={form.instructor} onChange={(e) => set('instructor', e.target.value)} placeholder="নাম (ঐচ্ছিক)" />
+                    </label>
+                    <label>
+                      লেভেল
+                      <input value={form.level} onChange={(e) => set('level', e.target.value)} placeholder="যেমন: Beginner" />
+                    </label>
+                    <label className="form-wide">
+                      পূর্বশর্ত
+                      <input value={form.prerequisites} onChange={(e) => set('prerequisites', e.target.value)} placeholder="ভর্তির আগে যা জানা দরকার (ঐচ্ছিক)" />
+                    </label>
+                    <label className="form-wide">
+                      কী কী শিখবেন (প্রতি লাইনে একটি)
+                      <textarea rows="3" value={form.learningOutcomes} onChange={(e) => set('learningOutcomes', e.target.value)} placeholder="বিষয় ১&#10;বিষয় ২" />
+                    </label>
+                    <label className="form-wide">
+                      কোর্স আউটলাইন (প্রতি লাইনে একটি মডিউল)
+                      <textarea rows="4" value={form.curriculum} onChange={(e) => set('curriculum', e.target.value)} placeholder="মডিউল ১: পরিচিতি&#10;মডিউল ২: হাতে-কলমে কাজ" />
+                    </label>
                   </div>
                   <button className="button button-primary">
                     <Check size={17} /> কোর্স প্রকাশ করুন
@@ -318,6 +358,10 @@ export default function AdminPage({
                 onDelete={(id) => setCourses(courses.filter((c) => c.id !== id))}
               />
             </section>
+          ) : tab === 'students' ? (
+            <StudentManagement accounts={accounts} enrollments={enrollments} courses={courses} />
+          ) : (
+            <AnalyticsPage courses={courses} enrollments={enrollments} />
           )}
         </div>
       </main>

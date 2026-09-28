@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 import {
   ArrowRight,
   BookOpen,
@@ -17,6 +18,8 @@ import ThemeToggle from '../../components/ThemeToggle.jsx';
 
 export default function StudentHome({
   user,
+  enrolledIds = [],
+  onEnroll = () => {},
   isAdmin,
   navigate,
   logout,
@@ -28,11 +31,52 @@ export default function StudentHome({
   setQuery,
   mobileNav,
   setMobileNav,
-  notify,
   toast,
   theme,
   onToggleTheme,
 }) {
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    const context = gsap.context(() => {
+      gsap.from('.hero-copy > *', {
+        y: 24,
+        autoAlpha: 0,
+        duration: 0.75,
+        stagger: 0.12,
+        ease: 'power2.out',
+      });
+
+      gsap.utils.toArray('.stats-strip, .section-heading, .why-image, .why-copy, .story-card, .cta > div, .cta > a').forEach((element) => {
+        gsap.from(element, {
+          y: 30,
+          autoAlpha: 0,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: element,
+            start: 'top 88%',
+            once: true,
+          },
+        });
+      });
+
+      gsap.utils.toArray('.course-card').forEach((card) => {
+        gsap.from(card, {
+          y: 24,
+          autoAlpha: 0,
+          duration: 0.55,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: card, start: 'top 92%', once: true },
+        });
+      });
+    }, contentRef);
+
+    return () => context.revert();
+  }, []);
+
   return (
     <>
       <header className="topbar">
@@ -75,6 +119,7 @@ export default function StudentHome({
           {user ? (
             <>
               <span className="user-name">{user.name}</span>
+              {!isAdmin && <button className="button button-light" onClick={() => navigate('/dashboard')}>ড্যাশবোর্ড</button>}
               {isAdmin && (
                 <button
                   className="button button-light"
@@ -102,7 +147,7 @@ export default function StudentHome({
           )}
         </div>
       </header>
-      <main>
+      <main ref={contentRef}>
         <section className="hero" id="home">
           <div className="hero-glow glow-one" />
           <div className="hero-glow glow-two" />
@@ -251,7 +296,7 @@ export default function StudentHome({
                   <span className="course-online">অনলাইন · অফলাইন</span>
                 </div>
                 <div className="course-body">
-                  <h3>{c.name}</h3>
+                  <h3><a className="course-title-link" href={`/courses/${c.id}`} onClick={(event) => { event.preventDefault(); navigate(`/courses/${c.id}`); }}>{c.name}</a></h3>
                   <p>{c.description}</p>
                   <div className="course-info">
                     <span>◷ {c.duration}</span>
@@ -265,13 +310,11 @@ export default function StudentHome({
                       <del>{formatPrice(c.offlinePrice)}</del>
                     </div>
                     <button
-                      className="circle-arrow"
-                      onClick={() =>
-                        notify('ভর্তির জন্য আমাদের সঙ্গে যোগাযোগ করুন: ০১৯২৫২৫১১২৫')
-                      }
-                      aria-label="বিস্তারিত"
+                      className={enrolledIds.includes(c.id) ? 'button button-light' : 'circle-arrow'}
+                      onClick={() => onEnroll(c.id)}
+                      aria-label={enrolledIds.includes(c.id) ? 'ড্যাশবোর্ডে দেখুন' : 'কোর্সে ভর্তি'}
                     >
-                      <ArrowRight size={18} />
+                      {enrolledIds.includes(c.id) ? 'ড্যাশবোর্ডে যোগ হয়েছে' : <ArrowRight size={18} />}
                     </button>
                   </div>
                 </div>
