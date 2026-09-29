@@ -38,6 +38,7 @@ export default function AdminPage({
   setCourses,
   accounts = [],
   enrollments = {},
+  enrollmentProofs = [],
   onProfileUpdate,
   onLogout,
   onNavigate,
@@ -334,6 +335,7 @@ export default function AdminPage({
             <EnrollmentManagement
               accounts={accounts}
               enrollments={enrollments}
+              enrollmentProofs={enrollmentProofs}
               courses={courses}
             />
           )}

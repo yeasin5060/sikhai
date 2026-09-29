@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -6,10 +6,12 @@ import {
   Building2,
   Check,
   Clock3,
+  Copy,
   GraduationCap,
   Monitor,
   PlayCircle,
   Users,
+  Wallet,
 } from 'lucide-react';
 import { formatDigits, formatNumber, formatPrice } from '../../utils/formatters.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
@@ -25,6 +27,10 @@ export default function CourseDetails({
   onToggleTheme,
 }) {
   const enrolled = enrolledIds.includes(course.id);
+  const [deliveryMode, setDeliveryMode] = useState('online');
+  const [paymentMethod, setPaymentMethod] = useState('bkash');
+  const [transactionId, setTransactionId] = useState('');
+  const [paymentNumberCopied, setPaymentNumberCopied] = useState(false);
   const curriculum = Array.isArray(course.curriculum) ? course.curriculum : [];
   const outcomes =
     Array.isArray(course.learningOutcomes) && course.learningOutcomes.length
@@ -38,6 +44,16 @@ export default function CourseDetails({
   const relatedCourses = allCourses
     .filter((item) => item.id !== course.id && item.category === course.category)
     .slice(0, 3);
+
+  const copyPaymentNumber = async () => {
+    try {
+      await navigator.clipboard.writeText('01925251125');
+      setPaymentNumberCopied(true);
+      window.setTimeout(() => setPaymentNumberCopied(false), 1800);
+    } catch {
+      setPaymentNumberCopied(false);
+    }
+  };
 
   return (
     <div className="course-detail-page">
@@ -110,13 +126,17 @@ export default function CourseDetails({
             )}
             <button
               className="button button-primary course-hero-cta"
-              onClick={() => (enrolled ? onNavigate('/dashboard') : onEnroll(course.id))}
+              onClick={() => {
+                if (enrolled) onNavigate('/dashboard');
+                else document.getElementById('course-enroll-options')?.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'center',
+                });
+              }}
             >
               {enrolled
                 ? 'ড্যাশবোর্ডে যোগ হয়েছে'
-                : user
-                  ? 'কোর্সে ভর্তি হন'
-                  : 'লগইন করে ভর্তি হন'}{' '}
+                : 'শেখার পদ্ধতি বেছে নিন'}{' '}
               <ArrowRight size={17} />
             </button>
           </div>
@@ -239,23 +259,83 @@ export default function CourseDetails({
                   <Check size={16} /> প্রশিক্ষক: {course.instructor}
                 </div>
               )}
-              <div className="course-enroll-fees" aria-label="অনলাইন ও অফলাইন কোর্সের ফি">
-                <div className="course-fee-option online">
+              <div
+                id="course-enroll-options"
+                className="course-enroll-fees"
+                role="radiogroup"
+                aria-label="শেখার পদ্ধতি বেছে নিন"
+              >
+                <label
+                  className={`course-fee-option online ${deliveryMode === 'online' ? 'selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name={`delivery-mode-${course.id}`}
+                    value="online"
+                    checked={deliveryMode === 'online'}
+                    onChange={() => setDeliveryMode('online')}
+                  />
                   <span><Monitor size={15} /> অনলাইন ফি</span>
                   <strong>{formatPrice(course.onlinePrice)}</strong>
-                </div>
-                <div className="course-fee-option offline">
+                </label>
+                <label
+                  className={`course-fee-option offline ${deliveryMode === 'offline' ? 'selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name={`delivery-mode-${course.id}`}
+                    value="offline"
+                    checked={deliveryMode === 'offline'}
+                    onChange={() => setDeliveryMode('offline')}
+                  />
                   <span><Building2 size={15} /> অফলাইন ফি</span>
                   <strong>{formatPrice(course.offlinePrice)}</strong>
-                </div>
+                </label>
               </div>
+              <section className="course-payment-block" aria-label="পেমেন্ট মাধ্যম">
+                <div className="course-payment-heading">
+                  <Wallet size={16} />
+                  <span>পেমেন্ট মাধ্যম</span>
+                </div>
+                <div className="course-payment-brands">
+                  <label className={`payment-method-option payment-brand-bkash ${paymentMethod === 'bkash' ? 'selected' : ''}`}>
+                    <input type="radio" name={`payment-method-${course.id}`} value="bkash" checked={paymentMethod === 'bkash'} onChange={() => setPaymentMethod('bkash')} /> bKash
+                  </label>
+                  <label className={`payment-method-option payment-brand-nagad ${paymentMethod === 'nagad' ? 'selected' : ''}`}>
+                    <input type="radio" name={`payment-method-${course.id}`} value="nagad" checked={paymentMethod === 'nagad'} onChange={() => setPaymentMethod('nagad')} /> Nagad
+                  </label>
+                </div>
+                <p className="course-payment-instructions">উপরের নম্বরে {formatPrice(deliveryMode === 'offline' ? course.offlinePrice : course.onlinePrice)} সেন্ড মানি করুন। এরপর SMS-এ পাওয়া Transaction ID নিচে লিখে পেমেন্ট প্রুফ জমা দিন।</p>
+                <label className="course-transaction-field">
+                  <span>Transaction ID (পেমেন্ট প্রুফ) *</span>
+                  <input value={transactionId} onChange={(event) => setTransactionId(event.target.value)} placeholder="যেমন: 8A1B2C3D4E" maxLength={100} required />
+                </label>
+                <div className="course-payment-number">
+                  <span>পেমেন্ট নম্বর</span>
+                  <strong>01925251125</strong>
+                  <button
+                    type="button"
+                    onClick={copyPaymentNumber}
+                    aria-label="পেমেন্ট নম্বর কপি করুন"
+                  >
+                    {paymentNumberCopied ? <Check size={15} /> : <Copy size={15} />}
+                    {paymentNumberCopied ? 'কপি হয়েছে' : 'কপি'}
+                  </button>
+                </div>
+              </section>
               <button
                 className="button button-primary"
                 onClick={() =>
-                  enrolled ? onNavigate('/dashboard') : onEnroll(course.id)
+                  enrolled
+                    ? onNavigate('/dashboard')
+                    : onEnroll(course.id, deliveryMode, { paymentMethod, transactionId })
                 }
+                disabled={!enrolled && !transactionId.trim()}
               >
-                {enrolled ? 'ড্যাশবোর্ডে যান' : 'এখনই ভর্তি হন'} <ArrowRight size={16} />
+                {enrolled
+                  ? 'ড্যাশবোর্ডে যান'
+                  : `${deliveryMode === 'online' ? 'অনলাইন' : 'অফলাইন'} কোর্সে ভর্তি হন`}{' '}
+                <ArrowRight size={16} />
               </button>
               {enrolled && (
                 <button

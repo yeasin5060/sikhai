@@ -28,6 +28,7 @@ function App() {
   const [enrolledIds, setEnrolledIds] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [enrollments, setEnrollments] = useState({});
+  const [enrollmentProofs, setEnrollmentProofs] = useState([]);
   const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('সব');
@@ -105,6 +106,7 @@ function App() {
         .then(([studentsResponse, enrollmentsResponse]) => {
           if (!active) return;
           setAccounts(studentsResponse.data.students);
+          setEnrollmentProofs(enrollmentsResponse.data.enrollments);
           const byEmail = {};
           enrollmentsResponse.data.enrollments.forEach(({ student, course }) => {
             if (!student?.email || !course?.id) return;
@@ -176,7 +178,7 @@ function App() {
     saveAdminProfile(profile);
   };
 
-  const enrollInCourse = async (courseId) => {
+  const enrollInCourse = async (courseId, deliveryMode = 'online', paymentDetails = {}) => {
     if (!user) {
       navigate('/login');
       return;
@@ -184,7 +186,7 @@ function App() {
     const id = String(courseId);
     if (enrolledIds.includes(id)) return;
     try {
-      await api.post('/enrollments/' + id);
+      await api.post('/enrollments/' + id, { deliveryMode, ...paymentDetails });
       setEnrolledIds((currentIds) => [...new Set([...currentIds, id])]);
       notify('Enrolled in course successfully.');
     } catch (error) {
@@ -257,6 +259,7 @@ function App() {
         setCourses={setCourses}
         accounts={accounts}
         enrollments={enrollments}
+        enrollmentProofs={enrollmentProofs}
         onProfileUpdate={updateAdminProfile}
         onLogout={logout}
         onNavigate={navigate}
@@ -291,6 +294,7 @@ function App() {
           setCourses={setCourses}
           accounts={accounts}
           enrollments={enrollments}
+          enrollmentProofs={enrollmentProofs}
           onProfileUpdate={updateAdminProfile}
           onLogout={logout}
           onNavigate={navigate}
@@ -333,12 +337,11 @@ function App() {
   }
 
   return (
-    <StudentHome
-      user={user}
-      onNavigate={navigate}
-      enrolledIds={enrolledIds}
-      onEnroll={enrollInCourse}
-      isAdmin={isAdmin}
+      <StudentHome
+        user={user}
+        onNavigate={navigate}
+        enrolledIds={enrolledIds}
+        isAdmin={isAdmin}
       navigate={navigate}
       logout={logout}
       courses={courses}

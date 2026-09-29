@@ -5087,6 +5087,7 @@ body {
   margin: 16px 0 4px;
 }
 .course-fee-option {
+  position: relative;
   display: flex;
   min-width: 0;
   align-items: center;
@@ -5096,6 +5097,32 @@ body {
   border: 1px solid #d7edf0;
   border-radius: 11px;
   background: linear-gradient(110deg, #effbfc, #f8fcfc);
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.course-fee-option:hover {
+  transform: translateY(-1px);
+}
+.course-fee-option > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+.course-fee-option:focus-within {
+  outline: 3px solid #684bd133;
+  outline-offset: 2px;
+}
+.course-fee-option.online.selected {
+  border-color: #49bdca;
+  box-shadow: 0 0 0 2px #3cb6c41c;
+}
+.course-fee-option.offline.selected {
+  border-color: #e6a071;
+  box-shadow: 0 0 0 2px #df8c5a1c;
 }
 .course-fee-option > span {
   display: inline-flex;
@@ -5138,6 +5165,159 @@ body {
 :root[data-theme='dark'] .course-fee-option.offline > span,
 :root[data-theme='dark'] .course-fee-option.offline > strong {
   color: #ffad79;
+}
+:root[data-theme='dark'] .course-fee-option.online.selected {
+  border-color: #29b9cb;
+  box-shadow: 0 0 0 2px #29b9cb26;
+}
+:root[data-theme='dark'] .course-fee-option.offline.selected {
+  border-color: #e7834e;
+  box-shadow: 0 0 0 2px #e7834e26;
+}
+.course-payment-block {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 2px;
+  padding: 13px;
+  border: 1px solid #ebe6f1;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #fbfaff, #fff9f5);
+}
+.course-payment-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #39354d;
+  font-size: 12px;
+  font-weight: 700;
+}
+.course-payment-heading svg {
+  color: #7559d4;
+}
+.course-payment-brands {
+  display: flex;
+  gap: 7px;
+}
+.course-payment-brands > span,
+.course-payment-brands > label {
+  padding: 4px 9px;
+  border: 1px solid;
+  border-radius: 7px;
+  font-family: Inter, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+}
+.payment-method-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.payment-method-option input {
+  accent-color: currentColor;
+}
+.payment-method-option.selected {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+.course-payment-instructions {
+  margin: 0;
+  color: #686579;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.course-transaction-field {
+  display: grid;
+  gap: 6px;
+  color: #4b485d;
+  font-size: 11px;
+  font-weight: 650;
+}
+.course-transaction-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #e2ddec;
+  border-radius: 8px;
+  color: #29263e;
+  background: #fff;
+  font: inherit;
+}
+.course-transaction-field input:focus {
+  outline: 2px solid #7559d455;
+  border-color: #7559d4;
+}
+.payment-brand-bkash {
+  color: #c32c70;
+  border-color: #f0c7da !important;
+  background: #fff1f7;
+}
+.payment-brand-nagad {
+  color: #d35d27;
+  border-color: #f1d0b7 !important;
+  background: #fff4e9;
+}
+.course-payment-number {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 8px;
+  padding-top: 9px;
+  border-top: 1px solid #ebe6f1;
+}
+.course-payment-number > span {
+  color: #858397;
+  font-size: 10px;
+}
+.course-payment-number > strong {
+  grid-column: 1;
+  color: #29263e;
+  font-family: Inter, sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+}
+.course-payment-number > button {
+  display: inline-flex;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 9px;
+  border: 1px solid #e2dcf0;
+  border-radius: 8px;
+  color: #6349c0;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+.course-payment-number > button:hover {
+  border-color: #cbbef0;
+  background: #f6f2ff;
+}
+:root[data-theme='dark'] .course-payment-block {
+  border-color: #333141;
+  background: linear-gradient(135deg, #20202e, #29212a);
+}
+:root[data-theme='dark'] .course-payment-heading,
+:root[data-theme='dark'] .course-payment-number > strong {
+  color: #f0eff8;
+}
+:root[data-theme='dark'] .course-payment-number {
+  border-color: #383546;
+}
+:root[data-theme='dark'] .course-payment-number > button {
+  color: #d0c5ff;
+  border-color: #49415f;
+  background: #29243e;
+}
+:root[data-theme='dark'] .course-payment-instructions,
+:root[data-theme='dark'] .course-transaction-field {
+  color: #c2bfd1;
+}
+:root[data-theme='dark'] .course-transaction-field input {
+  border-color: #494557;
+  color: #f0eff8;
+  background: #201f2b;
 }
 @media (max-width: 680px) {
   .course-learning-heading {

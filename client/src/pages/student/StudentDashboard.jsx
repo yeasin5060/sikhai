@@ -259,7 +259,7 @@ export default function StudentDashboard({
                   </div>
                   <button
                     className="suggestion-add"
-                    onClick={() => onEnroll(course.id)}
+                    onClick={() => onNavigate(`/courses/${course.id}`)}
                     aria-label={`${course.name} কোর্সে ভর্তি হন`}
                   >
                     <ArrowRight size={18} />

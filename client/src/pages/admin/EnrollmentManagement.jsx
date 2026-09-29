@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import { formatDigits } from '../../utils/formatters.js';
 import { formatAdminCategory } from './adminLabels.js';
 
-export default function EnrollmentManagement({ accounts, enrollments, courses }) {
+export default function EnrollmentManagement({ accounts, enrollments, enrollmentProofs = [], courses }) {
   const [query, setQuery] = useState('');
   const records = useMemo(
     () =>
@@ -17,6 +17,9 @@ export default function EnrollmentManagement({ accounts, enrollments, courses })
               email,
               studentName: student?.name || email,
               course: courses.find((item) => item.id === courseId),
+              proof: enrollmentProofs.find((item) =>
+                item.student?.email?.toLowerCase() === email.toLowerCase() &&
+                String(item.course?.id) === String(courseId)),
             }))
             .filter((record) => record.course);
         })
@@ -25,7 +28,7 @@ export default function EnrollmentManagement({ accounts, enrollments, courses })
             .toLowerCase()
             .includes(query.toLowerCase()),
         ),
-    [accounts, courses, enrollments, query],
+    [accounts, courses, enrollments, enrollmentProofs, query],
   );
 
   return (
@@ -53,8 +56,9 @@ export default function EnrollmentManagement({ accounts, enrollments, courses })
                 <th>ইমেইল</th>
                 <th>কোর্স</th>
                 <th>বিভাগ</th>
-                <th>সময়কাল</th>
-                <th>অবস্থা</th>
+                  <th>সময়কাল</th>
+                  <th>পেমেন্ট প্রুফ</th>
+                  <th>অবস্থা</th>
               </tr>
             </thead>
             <tbody>
@@ -69,8 +73,9 @@ export default function EnrollmentManagement({ accounts, enrollments, courses })
                     </span>
                   </td>
                   <td>{formatDigits(record.course.duration)}</td>
+                  <td>{record.proof?.paymentMethod ? `${record.proof.paymentMethod === 'bkash' ? 'bKash' : 'Nagad'} · ${record.proof.transactionId || '—'}` : '—'}</td>
                   <td>
-                    <span className="enrollment-status">ভর্তি সম্পন্ন</span>
+                    <span className="enrollment-status">{record.proof?.paymentStatus === 'verified' ? 'পেমেন্ট যাচাই হয়েছে' : 'যাচাই অপেক্ষমাণ'}</span>
                   </td>
                 </tr>
               ))}

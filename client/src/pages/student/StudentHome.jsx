@@ -27,7 +27,6 @@ import ThemeToggle from '../../components/ThemeToggle.jsx';
 export default function StudentHome({
   user,
   enrolledIds = [],
-  onEnroll = () => {},
   isAdmin,
   navigate,
   logout,
@@ -391,7 +390,11 @@ export default function StudentHome({
                           ? 'course-enroll-button enrolled'
                           : 'course-enroll-button'
                       }
-                      onClick={() => onEnroll(c.id)}
+                      onClick={() =>
+                        enrolledIds.includes(c.id)
+                          ? navigate('/dashboard')
+                          : navigate(`/courses/${c.id}`)
+                      }
                       aria-label={
                         enrolledIds.includes(c.id) ? 'ড্যাশবোর্ডে দেখুন' : 'কোর্সে ভর্তি'
                       }
@@ -399,7 +402,7 @@ export default function StudentHome({
                       {enrolledIds.includes(c.id) ? (
                         <>কোর্সে আছেন <Check size={16} /></>
                       ) : (
-                        <>ভর্তি হন <ArrowRight size={16} /></>
+                        <>পদ্ধতি বেছে নিন <ArrowRight size={16} /></>
                       )}
                     </button>
                   </div>

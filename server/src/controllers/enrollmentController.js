@@ -9,12 +9,27 @@ export async function listMyEnrollments(req, res) {
 }
 
 export async function enroll(req, res) {
+  const deliveryMode = req.body?.deliveryMode || 'online';
+  const paymentMethod = req.body?.paymentMethod;
+  const transactionId = String(req.body?.transactionId || '').trim();
+  if (!['online', 'offline'].includes(deliveryMode)) {
+    return res.status(400).json({ message: 'Choose online or offline learning' });
+  }
+  if (!['bkash', 'nagad'].includes(paymentMethod) || !transactionId) {
+    return res.status(400).json({ message: 'Select a payment method and enter the transaction ID' });
+  }
+
   const course = await Course.findOne({ _id: req.params.courseId, published: true });
   if (!course) return res.status(404).json({ message: 'Course not found' });
+  const priceAtEnrollment =
+    deliveryMode === 'offline' ? course.offlinePrice : course.onlinePrice;
 
   const enrollment = await Enrollment.findOneAndUpdate(
     { student: req.user.id, course: course.id },
-    { $setOnInsert: { student: req.user.id, course: course.id } },
+    {
+      $set: { deliveryMode, priceAtEnrollment, paymentMethod, transactionId, paymentStatus: 'pending' },
+      $setOnInsert: { student: req.user.id, course: course.id },
+    },
     { new: true, upsert: true, setDefaultsOnInsert: true },
   ).populate('course');
   return res.status(200).json({ enrollment });
