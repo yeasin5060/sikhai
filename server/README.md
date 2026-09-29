@@ -35,4 +35,4 @@ Send protected requests with `Authorization: Bearer <token>`. Register and login
 
 ## Client integration
 
-The Vite client uses Axios and `VITE_API_URL` (defaults to `http://localhost:5000/api`). Copy `client/.env.example` to `client/.env` to configure a different API URL. Existing browser accounts, courses, and enrollments are not migrated automatically; register accounts again and seed courses with the command above.
+The Vite client uses Axios and `VITE_API_URL` (defaults to `http://localhost:5000/api` only in development). In the client Vercel project, set `VITE_API_URL` to the deployed server URL ending in `/api`, then redeploy the client. Set the server Vercel project's `CLIENT_ORIGIN` to the exact client origin (for example, `https://sikhai-black.vercel.app`). Existing browser accounts, courses, and enrollments are not migrated automatically; register accounts again and seed courses with the command above.

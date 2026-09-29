@@ -1,9 +1,21 @@
 import axios from 'axios';
 
+const apiBaseUrl =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://localhost:5000/api' : undefined);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: apiBaseUrl,
   headers: { 'Content-Type': 'application/json' },
 });
+
+if (!apiBaseUrl) {
+  api.interceptors.request.use(() =>
+    Promise.reject(
+      new Error('Set VITE_API_URL in the Vercel project and redeploy the frontend.'),
+    ),
+  );
+}
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('sikhai_token');
