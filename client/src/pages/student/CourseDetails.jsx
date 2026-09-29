@@ -3,9 +3,11 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  Building2,
   Check,
   Clock3,
   GraduationCap,
+  Monitor,
   PlayCircle,
   Users,
 } from 'lucide-react';
@@ -23,14 +25,16 @@ export default function CourseDetails({
   onToggleTheme,
 }) {
   const enrolled = enrolledIds.includes(course.id);
+  const curriculum = Array.isArray(course.curriculum) ? course.curriculum : [];
   const outcomes =
     Array.isArray(course.learningOutcomes) && course.learningOutcomes.length
       ? course.learningOutcomes
-      : course.description
+      : curriculum.length
+        ? curriculum
+        : course.description
           .split(/[,،]/)
           .map((item) => item.trim())
           .filter(Boolean);
-  const curriculum = Array.isArray(course.curriculum) ? course.curriculum : [];
   const relatedCourses = allCourses
     .filter((item) => item.id !== course.id && item.category === course.category)
     .slice(0, 3);
@@ -89,6 +93,16 @@ export default function CourseDetails({
                 </span>
               )}
             </div>
+            <div className="course-hero-fees" aria-label="কোর্সের অনলাইন ও অফলাইন ফি">
+              <div className="course-hero-fee online">
+                <span><Monitor size={15} /> অনলাইন ফি</span>
+                <strong>{formatPrice(course.onlinePrice)}</strong>
+              </div>
+              <div className="course-hero-fee offline">
+                <span><Building2 size={15} /> অফলাইন ফি</span>
+                <strong>{formatPrice(course.offlinePrice)}</strong>
+              </div>
+            </div>
             {course.instructor && (
               <p className="course-instructor">
                 প্রশিক্ষক <strong>{course.instructor}</strong>
@@ -111,8 +125,15 @@ export default function CourseDetails({
         <div className="course-detail-layout">
           <div className="course-detail-sections">
             <section className="course-info-panel" id="overview">
-              <span className="eyebrow">কোর্স পরিচিতি</span>
-              <h2>এই কোর্সে কী শিখবেন?</h2>
+              <div className="course-learning-heading">
+                <div>
+                  <span className="eyebrow">কোর্স পরিচিতি</span>
+                  <h2>এই কোর্সে যা শিখবেন</h2>
+                </div>
+                <span className="course-learning-count">
+                  <Check size={15} /> {formatNumber(outcomes.length)}টি বিষয়
+                </span>
+              </div>
               <p>{course.description}</p>
               <div className="course-outcomes">
                 {outcomes.map((outcome, index) => (
@@ -218,9 +239,15 @@ export default function CourseDetails({
                   <Check size={16} /> প্রশিক্ষক: {course.instructor}
                 </div>
               )}
-              <div className="course-enroll-price">
-                <strong>{formatPrice(course.onlinePrice)}</strong>
-                <del>{formatPrice(course.offlinePrice)}</del>
+              <div className="course-enroll-fees" aria-label="অনলাইন ও অফলাইন কোর্সের ফি">
+                <div className="course-fee-option online">
+                  <span><Monitor size={15} /> অনলাইন ফি</span>
+                  <strong>{formatPrice(course.onlinePrice)}</strong>
+                </div>
+                <div className="course-fee-option offline">
+                  <span><Building2 size={15} /> অফলাইন ফি</span>
+                  <strong>{formatPrice(course.offlinePrice)}</strong>
+                </div>
               </div>
               <button
                 className="button button-primary"

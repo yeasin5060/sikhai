@@ -30,7 +30,7 @@ function App() {
   const [enrollments, setEnrollments] = useState({});
   const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('\u00e0\u00a6\u00b8\u00e0\u00a6\u00ac');
+  const [category, setCategory] = useState('সব');
   const [mobileNav, setMobileNav] = useState(false);
   const [theme, setTheme] = useState(getInitialTheme);
 
@@ -206,7 +206,7 @@ function App() {
   const filteredCourses = useMemo(
     () =>
       courses.filter((course) => {
-        const matchesCategory = category === '\u00e0\u00a6\u00b8\u00e0\u00a6\u00ac' || course.category === category;
+        const matchesCategory = category === 'সব' || course.category === category;
         const searchableText = course.name + ' ' + course.description;
         return matchesCategory && searchableText.toLowerCase().includes(query.toLowerCase());
       }),

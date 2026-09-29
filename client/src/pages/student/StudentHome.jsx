@@ -2,17 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import {
   ArrowRight,
+  Building2,
   BookOpen,
   Check,
   ChevronRight,
   ChevronLeft,
+  Clock3,
   Code2,
   GraduationCap,
+  Mail,
+  MapPin,
   Menu,
+  Monitor,
+  Phone,
   Search,
   ShieldCheck,
   Sparkles,
   Users,
+  UsersRound,
 } from 'lucide-react';
 import { formatDigits, formatNumber, formatPrice } from '../../utils/formatters.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
@@ -37,6 +44,10 @@ export default function StudentHome({
 }) {
   const contentRef = useRef(null);
   const [activeHero, setActiveHero] = useState(0);
+  const categoryOptions = [
+    'সব',
+    ...new Set(courses.map((course) => course.category).filter(Boolean)),
+  ];
   const heroSlides = [
     { eyebrow: 'শেখা হোক ক্যারিয়ারের শক্তি', firstLine: 'শিখুন আজ,', secondLine: 'এগিয়ে যান আগামীকাল।', description: 'অভিজ্ঞ মেন্টরদের সঙ্গে নিজের গতিতে শিখুন স্বপ্নের ক্যারিয়ার গড়ার প্রয়োজনীয় দক্ষতা।', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=85', alt: 'শিক্ষার্থীরা একসঙ্গে শিখছেন', proofMain: '১,২০০+ শিক্ষার্থী', proofSub: 'শিখছেন Shikhai-এর সঙ্গে', cardTitle: '১২+ ক্যারিয়ার কোর্স', cardSub: 'আপনার পছন্দের দক্ষতা', bottomTitle: 'শেখা থেকে ক্যারিয়ার', bottomSub: 'পরিকল্পনা অনুযায়ী এগিয়ে চলুন', caption: 'একসঙ্গে শিখুন' },
     { eyebrow: 'হাতে-কলমে দক্ষতা অর্জন', firstLine: 'বাস্তব কাজ শিখুন,', secondLine: 'ভবিষ্যৎ গড়ুন।', description: 'প্রজেক্টভিত্তিক কোর্স ও মেন্টরের সহায়তায় বাস্তব অভিজ্ঞতা নিয়ে নিজের পোর্টফোলিও তৈরি করুন।', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1000&q=85', alt: 'ল্যাপটপে কাজ শিখছেন একজন শিক্ষার্থী', proofMain: 'প্রজেক্টভিত্তিক শেখা', proofSub: 'কাজ করতে করতেই দক্ষতা', cardTitle: 'বাস্তব প্রজেক্ট', cardSub: 'পোর্টফোলিওতে যোগ করুন', bottomTitle: 'দক্ষতা যাচাই করুন', bottomSub: 'নিজের কাজ দেখান আত্মবিশ্বাসে', caption: 'প্র্যাকটিস করুন' },
@@ -291,16 +302,16 @@ export default function StudentHome({
         </section>
         <section id="courses" className="section courses-section">
           <div className="section-heading">
-            <div>
-              <span className="eyebrow">আপনার পরবর্তী পদক্ষেপ</span>
+            <div className="course-heading-copy">
+              <span className="course-kicker"><BookOpen size={16} /> শেখার জন্য বেছে নিন</span>
               <h2>পছন্দের কোর্স বেছে নিন</h2>
               <p>
-                বাস্তব কাজের জন্য তৈরি কোর্সে দক্ষতা বাড়ান, আত্মবিশ্বাস নিয়ে এগিয়ে যান।
+                নিজের লক্ষ্যের সঙ্গে মানানসই কোর্স খুঁজে দক্ষতার পরের ধাপে এগিয়ে যান।
               </p>
             </div>
             <div className="course-count">
-              <b className="number-display">{formatNumber(courses.length)}</b>
-              <span>টি কোর্স</span>
+              <span className="course-count-icon"><GraduationCap size={19} /></span>
+              <span><b className="number-display">{formatNumber(courses.length)}</b><small>টি কোর্স</small></span>
             </div>
           </div>
           <div className="course-tools">
@@ -310,37 +321,42 @@ export default function StudentHome({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="কোর্স খুঁজুন..."
+                aria-label="কোর্স খুঁজুন"
               />
             </label>
-            <div className="filters">
-              {[
-                'সব',
-                'ডেভেলপমেন্ট',
-                'ডিজাইন',
-                'মার্কেটিং',
-                'ভাষা',
-                'ম্যানেজমেন্ট',
-                'দক্ষতা',
-              ].map((c) => (
+            <div className="filters" role="group" aria-label="কোর্সের বিভাগ">
+              {categoryOptions.map((c) => (
                 <button
                   className={category === c ? 'filter active' : 'filter'}
                   onClick={() => setCategory(c)}
                   key={c}
+                  aria-pressed={category === c}
                 >
                   {c}
                 </button>
               ))}
             </div>
           </div>
+          <div className="course-results-row" aria-live="polite">
+            <span>দেখানো হচ্ছে <b className="number-display">{formatNumber(filteredCourses.length)}</b>টি কোর্স</span>
+            {(query || category !== 'সব') && (
+              <button className="course-reset" onClick={() => { setQuery(''); setCategory('সব'); }}>
+                ফিল্টার মুছুন
+              </button>
+            )}
+          </div>
           <div className="course-grid">
             {filteredCourses.map((c) => (
               <article className="course-card" key={c.id}>
                 <div className="course-image">
-                  <img src={c.image} alt={c.name} />
+                  <img src={c.image} alt={c.name} loading="lazy" />
                   <span className="course-category">{c.category}</span>
-                  <span className="course-online">অনলাইন · অফলাইন</span>
                 </div>
                 <div className="course-body">
+                  <div className="course-mode-tags" aria-label="কোর্সের ধরন">
+                    <span className="course-mode-online"><Monitor size={14} /> অনলাইন</span>
+                    <span className="course-mode-offline"><Building2 size={14} /> অফলাইন</span>
+                  </div>
                   <h3>
                     <a
                       className="course-title-link"
@@ -355,23 +371,25 @@ export default function StudentHome({
                   </h3>
                   <p>{c.description}</p>
                   <div className="course-info">
-                    <span>◷ {formatDigits(c.duration)}</span>
-                    <span>
-                      ♧{' '}
-                      <span className="number-display">{formatNumber(c.students)}+</span>{' '}
-                      শিক্ষার্থী
-                    </span>
+                    <span><Clock3 size={15} /> {formatDigits(c.duration)}</span>
+                    <span><UsersRound size={15} /> <span className="number-display">{formatNumber(c.students)}</span> শিক্ষার্থী</span>
                   </div>
                   <div className="course-footer">
-                    <div>
-                      <b>{formatPrice(c.onlinePrice)}</b>
-                      <del>{formatPrice(c.offlinePrice)}</del>
+                    <div className="course-price-options">
+                      <div className="course-price-option online">
+                        <small>অনলাইন ফি</small>
+                        <b>{formatPrice(c.onlinePrice)}</b>
+                      </div>
+                      <div className="course-price-option offline">
+                        <small>অফলাইন ফি</small>
+                        <b>{formatPrice(c.offlinePrice)}</b>
+                      </div>
                     </div>
                     <button
                       className={
                         enrolledIds.includes(c.id)
-                          ? 'button button-light'
-                          : 'circle-arrow'
+                          ? 'course-enroll-button enrolled'
+                          : 'course-enroll-button'
                       }
                       onClick={() => onEnroll(c.id)}
                       aria-label={
@@ -379,9 +397,9 @@ export default function StudentHome({
                       }
                     >
                       {enrolledIds.includes(c.id) ? (
-                        'ড্যাশবোর্ডে যোগ হয়েছে'
+                        <>কোর্সে আছেন <Check size={16} /></>
                       ) : (
-                        <ArrowRight size={18} />
+                        <>ভর্তি হন <ArrowRight size={16} /></>
                       )}
                     </button>
                   </div>
@@ -390,7 +408,11 @@ export default function StudentHome({
             ))}
           </div>
           {!filteredCourses.length && (
-            <div className="empty-state">এই খোঁজে কোনো কোর্স পাওয়া যায়নি।</div>
+            <div className="course-empty-state">
+              <span><Search size={21} /></span>
+              <b>কোনো কোর্স পাওয়া যায়নি</b>
+              <p>অন্য শব্দ দিয়ে খুঁজুন অথবা বিভাগ পরিবর্তন করে দেখুন।</p>
+            </div>
           )}
         </section>
         <section id="features" className="section why-section">
@@ -512,21 +534,44 @@ export default function StudentHome({
               </span>
               শিখাই<span className="brand-dot">.</span>
             </a>
-            <p>দক্ষতা অর্জনের সহজ পথ। আপনার আগামী দিনের ক্যারিয়ার গড়তে আমরা আছি পাশে।</p>
+            <p>
+              দক্ষতা অর্জনের সহজ পথ। বাস্তব কাজভিত্তিক কোর্স, অভিজ্ঞ মেন্টর আর
+              নিয়মিত সহায়তায় নিজের আগামী দিনের ক্যারিয়ার গড়ে তুলুন।
+            </p>
+            <a className="footer-contact-cta" href="mailto:info@sikhai.thelegendit.com">
+              <Mail size={15} /> আমাদের সঙ্গে কথা বলুন <ArrowRight size={14} />
+            </a>
           </div>
-          <div>
-            <b>দ্রুত লিংক</b>
-            <a href="#courses">সকল কোর্স</a>
+          <div className="footer-column">
+            <b>শিখাই সম্পর্কে</b>
             <a href="#why">আমাদের সম্পর্কে</a>
+            <a href="#features">কেন শিখাই</a>
             <a href="#stories">শিক্ষার্থীদের গল্প</a>
+            <a href="#courses">সব কোর্স দেখুন</a>
           </div>
-          <div>
-            <b>যোগাযোগ</b>
-            <a href="tel:+8801925251125">০১৯২৫২৫১১২৫</a>
-            <a href="mailto:info@sikhai.thelegendit.com">info@sikhai.thelegendit.com</a>
-            <span>ঢাকা, বাংলাদেশ</span>
+          <div className="footer-column">
+            <b>জনপ্রিয় বিভাগ</b>
+            {['ডেভেলপমেন্ট', 'ডিজাইন', 'মার্কেটিং', 'ভাষা'].map((item) => (
+              <a
+                href="#courses"
+                key={item}
+                onClick={() => setCategory(item)}
+              >
+                {item}
+              </a>
+            ))}
           </div>
-          <div>
+          <div className="footer-column footer-contact">
+            <b>যোগাযোগ করুন</b>
+            <a href="tel:+8801925251125"><Phone size={15} /> <span>০১৯২৫২৫১১২৫</span></a>
+            <a href="mailto:info@sikhai.thelegendit.com"><Mail size={15} /> <span>info@sikhai.thelegendit.com</span></a>
+            <span>
+              <MapPin size={15} />
+              <span>আইসিটি টাওয়ার, ই-১৪/এক্স, আগারগাঁও, ঢাকা-১২০৭</span>
+            </span>
+            <small>কোর্স বা ভর্তি বিষয়ে জানতে যোগাযোগ করুন।</small>
+          </div>
+          <div className="footer-column footer-account">
             <b>আপনার অ্যাকাউন্ট</b>
             <button className="footer-link" onClick={() => navigate('/login')}>
               লগইন
@@ -540,8 +585,9 @@ export default function StudentHome({
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© ২০২৬ শিখাই। সর্বস্বত্ব সংরক্ষিত।</span>
-          <span>বাংলাদেশে তৈরি, ভালোবাসা দিয়ে</span>
+          <span className="footer-copyright">
+            © {new Date().getFullYear()} শিখাই। সর্বস্বত্ব সংরক্ষিত। <i>•</i> বাংলাদেশে তৈরি, ভালোবাসা দিয়ে
+          </span>
         </div>
       </footer>
     </>
