@@ -11,13 +11,13 @@ import connectDB from './db/connectDB.js';
 
 const app = express();
 const port = Number(process.env.PORT) || 5000;
-const allowedOrigins = (
-  process.env.CLIENT_ORIGIN ||
-  'http://localhost:5173,https://sikhai-black.vercel.app'
-)
+const allowedOrigins = [
+  ...(process.env.CLIENT_ORIGIN || 'http://localhost:5173')
   .split(',')
   .map((origin) => origin.trim())
-  .filter(Boolean);
+  .filter(Boolean),
+  'https://sikhai-black.vercel.app',
+];
 
 app.disable('x-powered-by');
 app.use(helmet());
