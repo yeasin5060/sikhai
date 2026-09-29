@@ -56,7 +56,7 @@ export default function AuthPage({
     onAuth({ ...user, role: 'student' });
   }
   return (
-    <div className="auth-shell min-h-screen">
+    <div className={`auth-shell min-h-screen ${login || adminOnly ? 'auth-login' : 'auth-register'}`}>
       <div className="auth-art">
         <a
           className="brand"
