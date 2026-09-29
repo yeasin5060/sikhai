@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ArrowRight, GraduationCap } from 'lucide-react';
-import { getAccounts, saveAccounts } from '../../utils/storage.js';
+import { ArrowRight, Eye, EyeOff, GraduationCap } from 'lucide-react';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
+import api, { getApiErrorMessage } from '../../utils/api.js';
+import toast from 'react-hot-toast';
 
 export default function AuthPage({
   mode,
@@ -14,47 +15,32 @@ export default function AuthPage({
   const [name, setName] = useState(''),
     [email, setEmail] = useState(''),
     [password, setPassword] = useState(''),
-    [error, setError] = useState('');
+    [submitting, setSubmitting] = useState(false),
+    [showPassword, setShowPassword] = useState(false);
   const login = mode === 'login';
-  function submit(e) {
-    e.preventDefault();
-    setError('');
-    if (email.trim().toLowerCase() === 'admin@gmail.com' && password === 'admin123@') {
-      onAuth({ name: 'অ্যাডমিন', email: 'admin@gmail.com', role: 'admin' });
+
+  async function submit(event) {
+    event.preventDefault();
+    if (!login && password.length < 8) {
+      toast.error('Password must be at least 8 characters.');
       return;
     }
-    if (login) {
-      try {
-        const saved = getAccounts().find(
-          (u) => u.email === email.trim().toLowerCase() && u.password === password,
-        );
-        if (!saved) {
-          setError('ইমেইল বা পাসওয়ার্ড সঠিক নয়।');
-          return;
-        }
-        onAuth({ ...saved, role: 'student' });
-      } catch {
-        setError('আবার চেষ্টা করুন।');
-      }
-      return;
+
+    setSubmitting(true);
+    try {
+      const endpoint = login ? '/auth/login' : '/auth/register';
+      const payload = login
+        ? { email: email.trim().toLowerCase(), password }
+        : { name: name.trim(), email: email.trim().toLowerCase(), password };
+      const { data } = await api.post(endpoint, payload);
+      onAuth({ ...data.user, token: data.token });
+    } catch (requestError) {
+      toast.error(getApiErrorMessage(requestError));
+    } finally {
+      setSubmitting(false);
     }
-    if (password.length < 6) {
-      setError('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।');
-      return;
-    }
-    const users = getAccounts();
-    if (users.some((u) => u.email === email.trim().toLowerCase())) {
-      setError('এই ইমেইল দিয়ে অ্যাকাউন্ট আছে। লগইন করুন।');
-      return;
-    }
-    const user = {
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      password,
-    };
-    saveAccounts([...users, user]);
-    onAuth({ ...user, role: 'student' });
   }
+
   return (
     <div className={`auth-shell min-h-screen ${login || adminOnly ? 'auth-login' : 'auth-register'}`}>
       <div className="auth-art">
@@ -69,7 +55,7 @@ export default function AuthPage({
           <span className="brand-icon">
             <GraduationCap size={21} />
           </span>
-          শিখাই<span className="brand-dot">.</span>
+          শিখাই
         </a>
         <div>
           <span className="eyebrow">শেখার নতুন শুরু</span>
@@ -137,17 +123,27 @@ export default function AuthPage({
             </label>
             <label>
               পাসওয়ার্ড
+              <div className="password-field">
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="পাসওয়ার্ড লিখুন"
                 autoComplete={login ? 'current-password' : 'new-password'}
               />
+                <button
+                  className="password-toggle"
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </label>
-            {error && <div className="form-error">{error}</div>}
-            <button className="button button-primary auth-submit">
+            <button className="button button-primary auth-submit" disabled={submitting}>
               {login || adminOnly ? 'লগইন করুন' : 'অ্যাকাউন্ট তৈরি করুন'}{' '}
               <ArrowRight size={17} />
             </button>
@@ -157,9 +153,6 @@ export default function AuthPage({
             <button onClick={() => onNavigate(login ? '/register' : '/login')}>
               {login ? 'রেজিস্ট্রেশন করুন' : 'লগইন করুন'}
             </button>
-          </div>
-          <div className="demo-note">
-            ডেমো সংস্করণ: অ্যাকাউন্টের তথ্য এই ব্রাউজারেই সংরক্ষিত হয়।
           </div>
         </div>
       </div>

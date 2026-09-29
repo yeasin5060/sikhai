@@ -21,13 +21,16 @@ export default function StudentDashboard({
   onBrowse,
   onNavigate,
   onEnroll,
+  onUnenroll,
   onLogout,
   theme,
   onToggleTheme,
 }) {
   const [search, setSearch] = useState('');
   const [showFavorites, setShowFavorites] = useState(false);
-  const [favorites, setFavorites] = useState(() => getStudentFavorites(user.email));
+  const [favorites, setFavorites] = useState(() =>
+    getStudentFavorites(user.email).map(String),
+  );
   const enrolledCourses = courses.filter((course) => enrolledIds.includes(course.id));
   const availableCourses = courses
     .filter((course) => !enrolledIds.includes(course.id))
@@ -66,7 +69,7 @@ export default function StudentDashboard({
           <span className="brand-icon">
             <GraduationCap size={21} />
           </span>
-          শিখাই<span className="brand-dot">.</span>
+          শিখাই
         </a>
         <div className="student-dashboard-actions">
           <button className="button button-light" onClick={onBrowse}>
@@ -207,7 +210,7 @@ export default function StudentDashboard({
                       >
                         কোর্স খুলুন <ArrowRight size={15} />
                       </button>
-                      <span className="enrolled-badge">ভর্তি আছেন</span>
+                      <button className="button button-light" onClick={() => onUnenroll(course.id)}>Cancel enrollment</button>
                     </div>
                   </div>
                 </article>

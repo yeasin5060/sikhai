@@ -1,10 +1,7 @@
 const STORAGE_KEYS = {
-  accounts: 'sikhai_accounts',
-  courses: 'sikhai_courses',
-  user: 'sikhai_user',
-  enrollments: 'sikhai_enrollments',
   adminProfile: 'sikhai_admin_profile',
   favorites: 'sikhai_favorites',
+  token: 'sikhai_token',
 };
 
 function readJson(key, fallback) {
@@ -47,13 +44,6 @@ function repairMojibake(value) {
   return value;
 }
 
-export const getAccounts = () => repairMojibake(readJson(STORAGE_KEYS.accounts, []));
-export const getSavedUser = () => repairMojibake(readJson(STORAGE_KEYS.user, null));
-export const getSavedCourses = (fallback) =>
-  repairMojibake(readJson(STORAGE_KEYS.courses, fallback));
-export const getStudentEnrollments = (email) =>
-  readJson(STORAGE_KEYS.enrollments, {})[email?.toLowerCase()] || [];
-export const getAllStudentEnrollments = () => readJson(STORAGE_KEYS.enrollments, {});
 export const getAdminProfile = () =>
   repairMojibake(readJson(STORAGE_KEYS.adminProfile, {}));
 export const saveAdminProfile = (profile) =>
@@ -65,16 +55,8 @@ export const saveStudentFavorites = (email, courseIds) => {
   favorites[email.toLowerCase()] = courseIds;
   localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(favorites));
 };
-export const saveStudentEnrollments = (email, courseIds) => {
-  const enrollments = readJson(STORAGE_KEYS.enrollments, {});
-  enrollments[email.toLowerCase()] = courseIds;
-  localStorage.setItem(STORAGE_KEYS.enrollments, JSON.stringify(enrollments));
+export const getAuthToken = () => localStorage.getItem(STORAGE_KEYS.token);
+export const saveAuthToken = (token) => localStorage.setItem(STORAGE_KEYS.token, token);
+export const clearUser = () => {
+  localStorage.removeItem(STORAGE_KEYS.token);
 };
-
-export const saveAccounts = (accounts) =>
-  localStorage.setItem(STORAGE_KEYS.accounts, JSON.stringify(accounts));
-export const saveUser = (user) =>
-  localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
-export const clearUser = () => localStorage.removeItem(STORAGE_KEYS.user);
-export const saveCourses = (courses) =>
-  localStorage.setItem(STORAGE_KEYS.courses, JSON.stringify(courses));

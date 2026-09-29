@@ -1,22 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
+import api, { getApiErrorMessage } from './utils/api.js';
+import toast from 'react-hot-toast';
 import AdminPage from './pages/admin/AdminPage.jsx';
 import AuthPage from './pages/student/AuthPage.jsx';
 import StudentHome from './pages/student/StudentHome.jsx';
 import StudentDashboard from './pages/student/StudentDashboard.jsx';
 import CourseDetails from './pages/student/CourseDetails.jsx';
-import { starterCourses } from './data/courses.js';
 import {
   clearUser,
-  getAccounts,
+  getAuthToken,
   getAdminProfile,
-  getAllStudentEnrollments,
-  getSavedCourses,
-  getSavedUser,
-  getStudentEnrollments,
-  saveCourses,
+  saveAuthToken,
   saveAdminProfile,
-  saveUser,
-  saveStudentEnrollments,
 } from './utils/storage.js';
 
 function getInitialTheme() {
@@ -28,16 +23,19 @@ function getInitialTheme() {
 
 function App() {
   const [path, setPath] = useState(window.location.pathname);
-  const [user, setUser] = useState(getSavedUser);
-  const [courses, setCourses] = useState(() => getSavedCourses(starterCourses));
-  const [enrolledIds, setEnrolledIds] = useState(() =>
-    getStudentEnrollments(getSavedUser()?.email),
-  );
+  const [user, setUser] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [enrolledIds, setEnrolledIds] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [enrollments, setEnrollments] = useState({});
+  const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('সব');
+  const [category, setCategory] = useState('\u00e0\u00a6\u00b8\u00e0\u00a6\u00ac');
   const [mobileNav, setMobileNav] = useState(false);
-  const [toast, setToast] = useState('');
   const [theme, setTheme] = useState(getInitialTheme);
+
+  const notify = (message, type = 'success') =>
+    type === 'error' ? toast.error(message) : toast.success(message);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -49,14 +47,107 @@ function App() {
     setTheme((currentTheme) => (currentTheme === 'light' ? 'dark' : 'light'));
 
   useEffect(() => {
+    let active = true;
+    api.get('/courses')
+      .then(({ data }) => {
+        if (active) setCourses(data.courses);
+      })
+      .catch((error) => {
+        if (active) notify(getApiErrorMessage(error, 'Could not load courses.'), 'error');
+      });
+
+    if (!getAuthToken()) {
+      setAuthReady(true);
+    } else {
+      api.get('/auth/me')
+        .then(({ data }) => {
+          if (!active) return;
+          const profile = data.user.role === 'admin' ? getAdminProfile() : {};
+          setUser({ ...data.user, ...profile });
+        })
+        .catch(() => {
+          clearUser();
+        })
+        .finally(() => {
+          if (active) setAuthReady(true);
+        });
+    }
+
     const syncPath = () => setPath(window.location.pathname);
     window.addEventListener('popstate', syncPath);
-    return () => window.removeEventListener('popstate', syncPath);
+    return () => {
+      active = false;
+      window.removeEventListener('popstate', syncPath);
+    };
   }, []);
 
   useEffect(() => {
-    saveCourses(courses);
-  }, [courses]);
+    if (!user) {
+      setEnrolledIds([]);
+      setAccounts([]);
+      setEnrollments({});
+      return undefined;
+    }
+
+    let active = true;
+    api.get('/enrollments/me')
+      .then(({ data }) => {
+        if (active) {
+          setEnrolledIds(data.enrollments.map(({ course }) => String(course.id)));
+        }
+      })
+      .catch((error) => {
+        if (active) notify(getApiErrorMessage(error, 'Could not load enrollments.'), 'error');
+      });
+
+    if (user.role === 'admin') {
+      Promise.all([api.get('/admin/students'), api.get('/admin/enrollments')])
+        .then(([studentsResponse, enrollmentsResponse]) => {
+          if (!active) return;
+          setAccounts(studentsResponse.data.students);
+          const byEmail = {};
+          enrollmentsResponse.data.enrollments.forEach(({ student, course }) => {
+            if (!student?.email || !course?.id) return;
+            const email = student.email.toLowerCase();
+            byEmail[email] ||= [];
+            byEmail[email].push(String(course.id));
+          });
+          setEnrollments(byEmail);
+        })
+        .catch((error) => {
+          if (active) notify(getApiErrorMessage(error, 'Could not load admin data.'), 'error');
+        });
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const match = path.match(/^\/courses\/([^/]+)$/);
+    if (!match) return undefined;
+
+    let active = true;
+    api.get('/courses/' + encodeURIComponent(match[1]))
+      .then(({ data }) => {
+        if (!active) return;
+        setCourses((currentCourses) => {
+          const exists = currentCourses.some((course) => String(course.id) === String(data.course.id));
+          return exists
+            ? currentCourses.map((course) =>
+                String(course.id) === String(data.course.id) ? data.course : course,
+              )
+            : [data.course, ...currentCourses];
+        });
+      })
+      .catch((error) => {
+        if (active) notify(getApiErrorMessage(error, 'Could not load this course.'), 'error');
+      });
+    return () => {
+      active = false;
+    };
+  }, [path]);
 
   const navigate = (nextPath) => {
     window.history.pushState({}, '', nextPath);
@@ -66,11 +157,6 @@ function App() {
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const notify = (message) => {
-    setToast(message);
-    window.setTimeout(() => setToast(''), 2600);
-  };
-
   const logout = () => {
     clearUser();
     setUser(null);
@@ -78,46 +164,60 @@ function App() {
   };
 
   const handleAuth = (authenticatedUser, redirectTo) => {
-    const profile = authenticatedUser.role === 'admin' ? getAdminProfile() : {};
-    const signedInUser = { ...authenticatedUser, ...profile };
-    setUser(signedInUser);
-    saveUser(signedInUser);
-    setEnrolledIds(getStudentEnrollments(signedInUser.email));
+    const { token, ...serverUser } = authenticatedUser;
+    saveAuthToken(token);
+    const profile = serverUser.role === 'admin' ? getAdminProfile() : {};
+    setUser({ ...serverUser, ...profile });
     navigate(redirectTo);
   };
 
   const updateAdminProfile = (profile) => {
-    const updatedUser = { ...user, ...profile };
-    setUser(updatedUser);
-    saveUser(updatedUser);
+    setUser((currentUser) => ({ ...currentUser, ...profile }));
     saveAdminProfile(profile);
   };
 
-  const enrollInCourse = (courseId) => {
+  const enrollInCourse = async (courseId) => {
     if (!user) {
       navigate('/login');
       return;
     }
-    if (enrolledIds.includes(courseId)) return;
-    const nextIds = [...enrolledIds, courseId];
-    setEnrolledIds(nextIds);
-    saveStudentEnrollments(user.email, nextIds);
-    notify('কোর্সটি আপনার ড্যাশবোর্ডে যোগ হয়েছে।');
+    const id = String(courseId);
+    if (enrolledIds.includes(id)) return;
+    try {
+      await api.post('/enrollments/' + id);
+      setEnrolledIds((currentIds) => [...new Set([...currentIds, id])]);
+      notify('Enrolled in course successfully.');
+    } catch (error) {
+      notify(getApiErrorMessage(error, 'Could not enroll in course.'), 'error');
+    }
+  };
+
+  const cancelEnrollment = async (courseId) => {
+    const id = String(courseId);
+    try {
+      await api.delete('/enrollments/' + id);
+      setEnrolledIds((currentIds) => currentIds.filter((enrolledId) => enrolledId !== id));
+      notify('Enrollment cancelled.');
+    } catch (error) {
+      notify(getApiErrorMessage(error, 'Could not cancel enrollment.'), 'error');
+    }
   };
 
   const filteredCourses = useMemo(
     () =>
       courses.filter((course) => {
-        const matchesCategory = category === 'সব' || course.category === category;
-        const searchableText = `${course.name} ${course.description}`;
-        return (
-          matchesCategory && searchableText.toLowerCase().includes(query.toLowerCase())
-        );
+        const matchesCategory = category === '\u00e0\u00a6\u00b8\u00e0\u00a6\u00ac' || course.category === category;
+        const searchableText = course.name + ' ' + course.description;
+        return matchesCategory && searchableText.toLowerCase().includes(query.toLowerCase());
       }),
     [category, courses, query],
   );
 
   const isAdmin = user?.role === 'admin';
+
+  if (!authReady) {
+    return <div className="app-loading">Loading Shikhai...</div>;
+  }
 
   if (path === '/login' || path === '/register') {
     return (
@@ -155,8 +255,8 @@ function App() {
         user={user}
         courses={courses}
         setCourses={setCourses}
-        accounts={getAccounts()}
-        enrollments={getAllStudentEnrollments()}
+        accounts={accounts}
+        enrollments={enrollments}
         onProfileUpdate={updateAdminProfile}
         onLogout={logout}
         onNavigate={navigate}
@@ -189,8 +289,8 @@ function App() {
           user={user}
           courses={courses}
           setCourses={setCourses}
-          accounts={getAccounts()}
-          enrollments={getAllStudentEnrollments()}
+          accounts={accounts}
+          enrollments={enrollments}
           onProfileUpdate={updateAdminProfile}
           onLogout={logout}
           onNavigate={navigate}
@@ -206,6 +306,7 @@ function App() {
         onBrowse={() => navigate('/')}
         onNavigate={navigate}
         onEnroll={enrollInCourse}
+        onUnenroll={cancelEnrollment}
         onLogout={logout}
         theme={theme}
         onToggleTheme={toggleTheme}
@@ -249,7 +350,6 @@ function App() {
       mobileNav={mobileNav}
       setMobileNav={setMobileNav}
       notify={notify}
-      toast={toast}
       theme={theme}
       onToggleTheme={toggleTheme}
     />

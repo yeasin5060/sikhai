@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import {
   ArrowRight,
   BookOpen,
   Check,
   ChevronRight,
+  ChevronLeft,
   Code2,
   GraduationCap,
   Menu,
@@ -31,22 +32,36 @@ export default function StudentHome({
   setQuery,
   mobileNav,
   setMobileNav,
-  toast,
   theme,
   onToggleTheme,
 }) {
   const contentRef = useRef(null);
+  const [activeHero, setActiveHero] = useState(0);
+  const heroSlides = [
+    { eyebrow: 'শেখা হোক ক্যারিয়ারের শক্তি', firstLine: 'শিখুন আজ,', secondLine: 'এগিয়ে যান আগামীকাল।', description: 'অভিজ্ঞ মেন্টরদের সঙ্গে নিজের গতিতে শিখুন স্বপ্নের ক্যারিয়ার গড়ার প্রয়োজনীয় দক্ষতা।', image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=85', alt: 'শিক্ষার্থীরা একসঙ্গে শিখছেন', proofMain: '১,২০০+ শিক্ষার্থী', proofSub: 'শিখছেন Shikhai-এর সঙ্গে', cardTitle: '১২+ ক্যারিয়ার কোর্স', cardSub: 'আপনার পছন্দের দক্ষতা', bottomTitle: 'শেখা থেকে ক্যারিয়ার', bottomSub: 'পরিকল্পনা অনুযায়ী এগিয়ে চলুন', caption: 'একসঙ্গে শিখুন' },
+    { eyebrow: 'হাতে-কলমে দক্ষতা অর্জন', firstLine: 'বাস্তব কাজ শিখুন,', secondLine: 'ভবিষ্যৎ গড়ুন।', description: 'প্রজেক্টভিত্তিক কোর্স ও মেন্টরের সহায়তায় বাস্তব অভিজ্ঞতা নিয়ে নিজের পোর্টফোলিও তৈরি করুন।', image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1000&q=85', alt: 'ল্যাপটপে কাজ শিখছেন একজন শিক্ষার্থী', proofMain: 'প্রজেক্টভিত্তিক শেখা', proofSub: 'কাজ করতে করতেই দক্ষতা', cardTitle: 'বাস্তব প্রজেক্ট', cardSub: 'পোর্টফোলিওতে যোগ করুন', bottomTitle: 'দক্ষতা যাচাই করুন', bottomSub: 'নিজের কাজ দেখান আত্মবিশ্বাসে', caption: 'প্র্যাকটিস করুন' },
+    { eyebrow: 'আপনার শেখা, আপনার গতিতে', firstLine: 'ছোট ছোট ধাপে,', secondLine: 'পৌঁছে যান বড় লক্ষ্যে।', description: 'নিজের সুবিধামতো শিখুন, পাঠগুলো বারবার দেখুন, আর নিয়মিত অনুশীলনে লক্ষ্যের পথে এগিয়ে যান।', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=85', alt: 'শিক্ষার্থীরা একসঙ্গে পড়াশোনা করছেন', proofMain: 'নিজের সময়ে শিখুন', proofSub: 'যেখানেই থাকুন, যখনই চান', cardTitle: 'শেখার স্বাধীনতা', cardSub: 'নিজের গতিতে এগিয়ে চলুন', bottomTitle: 'প্রতিদিন একটু করে', bottomSub: 'অভ্যাসেই আসে অগ্রগতি', caption: 'শেখা চলুক' },
+    { eyebrow: 'ক্যারিয়ার গড়ার পরবর্তী ধাপ', firstLine: 'নিজের দক্ষতায়,', secondLine: 'নিজের পরিচয় তৈরি করুন।', description: 'বাস্তব কাজ ও পোর্টফোলিওর মাধ্যমে নতুন সুযোগের জন্য প্রস্তুত হোন, আর নিজের অর্জন তুলে ধরুন।', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1000&q=85', alt: 'টিম হিসেবে কাজ করছেন পেশাদাররা', proofMain: 'ক্যারিয়ার প্রস্তুতি', proofSub: 'দক্ষতা থেকে সুযোগের পথে', cardTitle: 'পোর্টফোলিও তৈরি', cardSub: 'কাজ দিয়ে নিজের দক্ষতা দেখান', bottomTitle: 'পরবর্তী সুযোগের জন্য', bottomSub: 'প্রস্তুতি শুরু হোক আজই', caption: 'লক্ষ্যে এগিয়ে যান' },
+    { eyebrow: 'মেন্টরের সহায়তায় এগিয়ে চলুন', firstLine: 'প্রশ্ন করুন,', secondLine: 'শিখুন আরও আত্মবিশ্বাসে।', description: 'শেখার পথে অভিজ্ঞ মেন্টরের দিকনির্দেশনা নিন, জটিল বিষয় পরিষ্কার করুন, আর নিজের লক্ষ্যে স্থির থাকুন।', image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1000&q=85', alt: 'মেন্টরদের সঙ্গে আলোচনায় শিক্ষার্থীরা', proofMain: 'মেন্টরের দিকনির্দেশনা', proofSub: 'সহায়তা থাকুক শেখার পথে', cardTitle: 'বিশেষজ্ঞ মেন্টর', cardSub: 'প্রতিটি ধাপে পাশে থাকবেন', bottomTitle: 'সহায়তা সবসময়', bottomSub: 'শিখুন নিজের আত্মবিশ্বাসে', caption: 'একসঙ্গে এগিয়ে চলুন' },
+  ];
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const timer = window.setInterval(() => {
+      setActiveHero((index) => (index + 1) % heroSlides.length);
+    }, 6000);
+    return () => window.clearInterval(timer);
+  }, [heroSlides.length]);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
     const context = gsap.context(() => {
-      gsap.from('.hero-copy > *', {
-        y: 24,
+      gsap.from('.hero-bottom', {
+        x: 72,
         autoAlpha: 0,
-        duration: 0.75,
-        stagger: 0.12,
-        ease: 'power2.out',
+        duration: 0.95,
+        ease: 'power3.out',
       });
 
       gsap.utils
@@ -95,7 +110,7 @@ export default function StudentHome({
           <span className="brand-icon">
             <GraduationCap size={21} />
           </span>
-          শিখাই<span className="brand-dot">.</span>
+          শিখাই
         </a>
         <button
           className="mobile-toggle"
@@ -105,18 +120,10 @@ export default function StudentHome({
           <Menu />
         </button>
         <nav className={mobileNav ? 'nav open' : 'nav'}>
-          <a href="#courses" onClick={() => setMobileNav(false)}>
-            কোর্স
-          </a>
-          <a href="#why" onClick={() => setMobileNav(false)}>
-            আমাদের সম্পর্কে
-          </a>
-          <a href="#stories" onClick={() => setMobileNav(false)}>
-            শিক্ষার্থীদের কথা
-          </a>
-          <a href="#contact" onClick={() => setMobileNav(false)}>
-            যোগাযোগ
-          </a>
+          <a href="#home" onClick={() => setMobileNav(false)}>{'হোম'}</a>
+          <a href="#courses" onClick={() => setMobileNav(false)}>{'কোর্সমূহ'}</a>
+          <a href="#features" onClick={() => setMobileNav(false)}>{'সুবিধা'}</a>
+          <a href="#testimonials" onClick={() => setMobileNav(false)}>{'সফলশিক্ষার্থী'}</a>
         </nav>
         <div className="nav-actions">
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
@@ -159,22 +166,30 @@ export default function StudentHome({
         </div>
       </header>
       <main ref={contentRef}>
-        <section className="hero" id="home">
+        <section className="hero" id="home" aria-roledescription="carousel" aria-label="Homepage banners">
           <div className="hero-glow glow-one" />
           <div className="hero-glow glow-two" />
-          <div className="hero-inner">
+          <div
+            className="hero-carousel-track"
+            style={{
+              width: `${heroSlides.length * 100}%`,
+              transform: `translateX(-${(activeHero * 100) / heroSlides.length}%)`,
+            }}
+          >
+            {heroSlides.map((slide, index) => (
+          <div
+            className={`hero-inner hero-slide-${index + 1}`}
+            style={{ flex: `0 0 ${100 / heroSlides.length}%` }}
+            key={slide.image}
+          >
             <div className="hero-copy">
               <div className="eyebrow">
-                <Sparkles size={15} /> শেখা হোক ক্যারিয়ারের শক্তি
+                <Sparkles size={15} /> {slide.eyebrow}
               </div>
               <h1>
-                শিখুন আজ,
-                <br />
-                <span>এগিয়ে যান আগামীকাল।</span>
+                {slide.firstLine}<br /><span>{slide.secondLine}</span>
               </h1>
-              <p>
-                আপনার স্বপ্নের ক্যারিয়ার গড়ার জন্য প্রয়োজনীয় দক্ষতা শিখুন অভিজ্ঞ মেন্টরদের
-                সঙ্গে—নিজের গতিতে, নিজের সুবিধামতো।
+              <p>{slide.description}
               </p>
               <div className="hero-actions">
                 <a className="button button-primary" href="#courses">
@@ -192,8 +207,8 @@ export default function StudentHome({
                   <span>+</span>
                 </div>
                 <div>
-                  <strong>১,২০০+ শিক্ষার্থী</strong>
-                  <small>দক্ষতা গড়ছেন শিখাইয়ের সঙ্গে</small>
+                  <strong>{slide.proofMain}</strong>
+                  <small>{slide.proofSub}</small>
                 </div>
                 <div className="rating">
                   <b>★ ৪.৯</b>
@@ -203,16 +218,16 @@ export default function StudentHome({
             </div>
             <div className="hero-visual">
               <img
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=85"
-                alt="একসঙ্গে শিখছেন শিক্ষার্থীরা"
+                src={slide.image}
+                alt={slide.alt}
               />
               <div className="floating-card card-top">
                 <span className="float-icon purple">
                   <BookOpen size={19} />
                 </span>
                 <div>
-                  <b>১২টি কোর্স</b>
-                  <small>আপনার পছন্দের দক্ষতা</small>
+                  <b>{slide.cardTitle}</b>
+                  <small>{slide.cardSub}</small>
                 </div>
               </div>
               <div className="floating-card card-bottom">
@@ -220,21 +235,40 @@ export default function StudentHome({
                   <Check size={20} />
                 </span>
                 <div>
-                  <b>শিখুন, তৈরি করুন</b>
-                  <small>সার্টিফিকেটসহ</small>
+                  <b>{slide.bottomTitle}</b>
+                  <small>{slide.bottomSub}</small>
                 </div>
               </div>
               <div className="visual-caption">
                 <span>
-                  <span className="live-dot" /> লাইভ ক্লাস
+                  <span className="live-dot" /> {slide.caption}
                 </span>
                 <span>● মেন্টর সাপোর্ট</span>
               </div>
             </div>
           </div>
+            ))}
+          </div>
           <div className="hero-bottom">
             <span>আপনার শেখার যাত্রা শুরু হোক</span>
-            <span className="scroll-mark">↓</span>
+            <div className="hero-carousel-controls" aria-label="Hero banner controls">
+              <button type="button" aria-label="Previous banner" onClick={() => setActiveHero((activeHero + heroSlides.length - 1) % heroSlides.length)}>
+                <ChevronLeft size={16} />
+              </button>
+              {heroSlides.map((slide, index) => (
+                <button
+                  type="button"
+                  className={index === activeHero ? 'hero-dot active' : 'hero-dot'}
+                  aria-label={`Show banner ${index + 1}`}
+                  aria-current={index === activeHero ? 'true' : undefined}
+                  onClick={() => setActiveHero(index)}
+                  key={slide.image}
+                />
+              ))}
+              <button type="button" aria-label="Next banner" onClick={() => setActiveHero((activeHero + 1) % heroSlides.length)}>
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </section>
         <section className="stats-strip">
@@ -359,7 +393,7 @@ export default function StudentHome({
             <div className="empty-state">এই খোঁজে কোনো কোর্স পাওয়া যায়নি।</div>
           )}
         </section>
-        <section id="why" className="section why-section">
+        <section id="features" className="section why-section">
           <div className="why-image">
             <img
               src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1000&q=85"
@@ -373,7 +407,7 @@ export default function StudentHome({
               </span>
             </div>
           </div>
-          <div className="why-copy">
+          <div className="why-copy" id="why">
             <span className="eyebrow">কেন শিখাই?</span>
             <h2>
               শেখার অভিজ্ঞতা,
@@ -413,8 +447,8 @@ export default function StudentHome({
             </div>
           </div>
         </section>
-        <section id="stories" className="section stories-section">
-          <div className="center-heading">
+        <section id="testimonials" className="section stories-section">
+          <div className="center-heading" id="stories">
             <span className="eyebrow">শিক্ষার্থীদের গল্প</span>
             <h2>তাদের সাফল্যই আমাদের অনুপ্রেরণা</h2>
           </div>
@@ -510,12 +544,6 @@ export default function StudentHome({
           <span>বাংলাদেশে তৈরি, ভালোবাসা দিয়ে</span>
         </div>
       </footer>
-      {toast && (
-        <div className="toast">
-          <Check size={17} />
-          {toast}
-        </div>
-      )}
     </>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   ArrowRight,
   BookOpen,
@@ -20,6 +21,7 @@ import AnalyticsPage from './AnalyticsPage.jsx';
 import EnrollmentManagement from './EnrollmentManagement.jsx';
 import CourseForm, { createEmptyCourseForm } from './CourseForm.jsx';
 import { formatNumber } from '../../utils/formatters.js';
+import api, { getApiErrorMessage } from '../../utils/api.js';
 
 const tabTitles = {
   overview: 'ড্যাশবোর্ড',
@@ -50,7 +52,6 @@ export default function AdminPage({
     name: user.name || '',
     phone: user.phone || '',
   });
-  const [notice, setNotice] = useState('');
 
   const setField = (field, value) =>
     setForm((current) => ({ ...current, [field]: value }));
@@ -58,10 +59,8 @@ export default function AdminPage({
     setForm(createEmptyCourseForm());
     setEditingCourseId(null);
   };
-  const showNotice = (message) => {
-    setNotice(message);
-    window.setTimeout(() => setNotice(''), 2500);
-  };
+  const showNotice = (message, type = 'success') =>
+    type === 'error' ? toast.error(message) : toast.success(message);
 
   const editCourse = (course) => {
     setTab('courses');
@@ -83,12 +82,11 @@ export default function AdminPage({
     });
   };
 
-  const saveCourse = (event) => {
+  const saveCourse = async (event) => {
     event.preventDefault();
     const previous = courses.find((course) => course.id === editingCourseId);
     const courseData = {
       ...form,
-      id: editingCourseId ?? Date.now(),
       onlinePrice: Number(form.onlinePrice),
       offlinePrice: Number(form.offlinePrice),
       students: Number(form.students) || 0,
@@ -106,16 +104,35 @@ export default function AdminPage({
         'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
     };
     const wasEditing = editingCourseId !== null;
-    setCourses(
-      wasEditing
-        ? courses.map((course) => (course.id === editingCourseId ? courseData : course))
-        : [courseData, ...courses],
-    );
-    resetCourseForm();
-    setShowForm(false);
-    showNotice(
-      wasEditing ? 'কোর্সের তথ্য হালনাগাদ হয়েছে।' : 'নতুন কোর্স প্রকাশিত হয়েছে।',
-    );
+    try {
+      const { data } = wasEditing
+        ? await api.patch('/courses/' + editingCourseId, courseData)
+        : await api.post('/courses', courseData);
+      setCourses((currentCourses) =>
+        wasEditing
+          ? currentCourses.map((course) =>
+              course.id === editingCourseId ? data.course : course,
+            )
+          : [data.course, ...currentCourses],
+      );
+      resetCourseForm();
+      setShowForm(false);
+      showNotice(wasEditing ? 'Course updated.' : 'Course created.');
+    } catch (error) {
+      showNotice(getApiErrorMessage(error, 'Could not save course.'), 'error');
+    }
+  };
+
+  const deleteCourse = async (id) => {
+    try {
+      await api.delete('/courses/' + id);
+      setCourses((currentCourses) =>
+        currentCourses.filter((course) => String(course.id) !== String(id)),
+      );
+      showNotice('Course deleted.');
+    } catch (error) {
+      showNotice(getApiErrorMessage(error, 'Could not delete course.'), 'error');
+    }
   };
 
   const enrollmentCount = Object.values(enrollments).reduce(
@@ -255,9 +272,7 @@ export default function AdminPage({
                 <CourseTable
                   courses={courses.slice(0, 5)}
                   onEdit={editCourse}
-                  onDelete={(id) =>
-                    setCourses(courses.filter((course) => course.id !== id))
-                  }
+                  onDelete={deleteCourse}
                 />
               </section>
             </>
@@ -303,9 +318,7 @@ export default function AdminPage({
               <CourseTable
                 courses={courses}
                 onEdit={editCourse}
-                onDelete={(id) =>
-                  setCourses(courses.filter((course) => course.id !== id))
-                }
+                onDelete={deleteCourse}
               />
             </section>
           )}
@@ -374,12 +387,6 @@ export default function AdminPage({
           )}
         </div>
       </main>
-      {notice && (
-        <div className="toast">
-          <Check size={17} />
-          {notice}
-        </div>
-      )}
     </div>
   );
 }
