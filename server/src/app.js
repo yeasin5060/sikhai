@@ -28,7 +28,7 @@ app.use(
 );
 app.use(express.json({ limit: '1mb' }));
 
-app.get('/api/health', (_req, res) => {
+app.get('/', (_req, res) => {
   res.json({ status: 'ok', service: 'sikhai-api' });
 });
 app.use('/api/auth', authRoutes);
