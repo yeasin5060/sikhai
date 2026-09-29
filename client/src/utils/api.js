@@ -24,7 +24,14 @@ api.interceptors.request.use((config) => {
 });
 
 export function getApiErrorMessage(error, fallback = 'Request failed. Please try again.') {
-  return error.response?.data?.message || fallback;
+  if (error.response?.data?.message) return error.response.data.message;
+  if (!error.response) {
+    return (
+      error.message ||
+      'Cannot reach the API. Check VITE_API_URL and the backend deployment.'
+    );
+  }
+  return fallback;
 }
 
 export default api;
