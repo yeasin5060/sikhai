@@ -32,25 +32,27 @@ export default function StudentDashboard({
     getStudentFavorites(user.email).map(String),
   );
   const enrolledCourses = courses.filter((course) => enrolledIds.includes(course.id));
+  const favoriteCourses = courses.filter((course) => favorites.includes(String(course.id)));
   const availableCourses = courses
     .filter((course) => !enrolledIds.includes(course.id))
     .slice(0, 3);
   const categories = new Set(enrolledCourses.map((course) => course.category)).size;
   const visibleCourses = useMemo(
     () =>
-      enrolledCourses.filter((course) => {
+      (showFavorites ? favoriteCourses : enrolledCourses).filter((course) => {
         const matchesSearch = `${course.name} ${course.category}`
           .toLowerCase()
           .includes(search.toLowerCase());
-        return matchesSearch && (!showFavorites || favorites.includes(course.id));
+        return matchesSearch;
       }),
-    [enrolledCourses, favorites, search, showFavorites],
+    [enrolledCourses, favoriteCourses, search, showFavorites],
   );
 
   const toggleFavorite = (courseId) => {
-    const nextFavorites = favorites.includes(courseId)
-      ? favorites.filter((id) => id !== courseId)
-      : [...favorites, courseId];
+    const normalizedId = String(courseId);
+    const nextFavorites = favorites.includes(normalizedId)
+      ? favorites.filter((id) => id !== normalizedId)
+      : [...favorites, normalizedId];
     setFavorites(nextFavorites);
     saveStudentFavorites(user.email, nextFavorites);
   };
@@ -178,20 +180,20 @@ export default function StudentDashboard({
                     <span>{course.category}</span>
                     <button
                       className={
-                        favorites.includes(course.id)
+                        favorites.includes(String(course.id))
                           ? 'favorite-button active'
                           : 'favorite-button'
                       }
                       onClick={() => toggleFavorite(course.id)}
                       aria-label={
-                        favorites.includes(course.id)
+                        favorites.includes(String(course.id))
                           ? 'পছন্দ থেকে সরান'
                           : 'পছন্দে যোগ করুন'
                       }
                     >
                       <Heart
                         size={17}
-                        fill={favorites.includes(course.id) ? 'currentColor' : 'none'}
+                        fill={favorites.includes(String(course.id)) ? 'currentColor' : 'none'}
                       />
                     </button>
                   </div>
@@ -210,7 +212,9 @@ export default function StudentDashboard({
                       >
                         কোর্স খুলুন <ArrowRight size={15} />
                       </button>
-                      <button className="button button-light" onClick={() => onUnenroll(course.id)}>Cancel enrollment</button>
+                      {enrolledIds.includes(course.id) && (
+                        <button className="button button-light" onClick={() => onUnenroll(course.id)}>Cancel enrollment</button>
+                      )}
                     </div>
                   </div>
                 </article>

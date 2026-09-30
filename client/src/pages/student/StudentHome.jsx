@@ -10,6 +10,7 @@ import {
   Clock3,
   Code2,
   GraduationCap,
+  Heart,
   Mail,
   MapPin,
   Menu,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { formatDigits, formatNumber, formatPrice } from '../../utils/formatters.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
+import { getStudentFavorites, saveStudentFavorites } from '../../utils/storage.js';
 
 export default function StudentHome({
   user,
@@ -43,6 +45,17 @@ export default function StudentHome({
 }) {
   const contentRef = useRef(null);
   const [activeHero, setActiveHero] = useState(0);
+  const [favorites, setFavorites] = useState(() =>
+    user?.email ? getStudentFavorites(user.email).map(String) : [],
+  );
+  const toggleFavorite = (courseId) => {
+    if (!user?.email) return;
+    const nextFavorites = favorites.includes(courseId)
+      ? favorites.filter((id) => id !== courseId)
+      : [...favorites, courseId];
+    setFavorites(nextFavorites);
+    saveStudentFavorites(user.email, nextFavorites);
+  };
   const categoryOptions = [
     'সব',
     ...new Set(courses.map((course) => course.category).filter(Boolean)),
@@ -350,6 +363,17 @@ export default function StudentHome({
                 <div className="course-image">
                   <img src={c.image} alt={c.name} loading="lazy" />
                   <span className="course-category">{c.category}</span>
+                  {user?.email && (
+                    <button
+                      type="button"
+                      className={favorites.includes(String(c.id)) ? 'favorite-button active course-favorite-button' : 'favorite-button course-favorite-button'}
+                      onClick={() => toggleFavorite(String(c.id))}
+                      aria-label={favorites.includes(String(c.id)) ? 'পছন্দের তালিকা থেকে সরান' : 'পছন্দের তালিকায় যোগ করুন'}
+                      aria-pressed={favorites.includes(String(c.id))}
+                    >
+                      <Heart size={18} fill={favorites.includes(String(c.id)) ? 'currentColor' : 'none'} />
+                    </button>
+                  )}
                 </div>
                 <div className="course-body">
                   <div className="course-mode-tags" aria-label="কোর্সের ধরন">

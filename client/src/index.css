@@ -1399,6 +1399,11 @@
 .favorite-button.active {
   color: #d94e86;
 }
+.course-favorite-button {
+  z-index: 2;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #17132924;
+}
 .student-course-body {
   padding: 16px;
 }
