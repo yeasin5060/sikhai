@@ -4,12 +4,14 @@ import {
   ArrowRight,
   BookOpen,
   ChartNoAxesColumn,
+  Check,
   ChevronRight,
   ClipboardList,
   GraduationCap,
   LayoutDashboard,
   LogOut,
   Plus,
+  Sparkles,
   UserRoundCog,
   Users,
   Video,
@@ -167,21 +169,25 @@ export default function AdminPage({
           <span className="brand-icon">
             <GraduationCap size={21} />
           </span>
-          শিখাই<span className="brand-dot">.</span>
+          শিখাই<span className="brand-dot"></span>
         </a>
         <div className="admin-label">অ্যাডমিন মেনু</div>
-        {tabs.map(([id, icon, label, count]) => (
-          <button
-            className={tab === id ? 'side-link selected' : 'side-link'}
-            onClick={() => setTab(id)}
-            key={id}
-          >
-            {icon} {label}
-            {count !== undefined && (
-              <span className="number-display">{formatNumber(count)}</span>
-            )}
-          </button>
-        ))}
+        <nav className="admin-nav" aria-label="Admin navigation">
+          {tabs.map(([id, icon, label, count]) => (
+            <button
+              className={tab === id ? 'side-link selected' : 'side-link'}
+              onClick={() => setTab(id)}
+              key={id}
+              aria-current={tab === id ? 'page' : undefined}
+            >
+              <span className="side-link-icon">{icon}</span>
+              <span className="side-link-label">{label}</span>
+              {count !== undefined && (
+                <span className="number-display side-link-count">{formatNumber(count)}</span>
+              )}
+            </button>
+          ))}
+        </nav>
         <div className="sidebar-bottom">
           <div className="admin-profile">
             <span className="profile-avatar">অ</span>
@@ -190,10 +196,10 @@ export default function AdminPage({
               <small>অ্যাডমিন</small>
             </div>
           </div>
-          <button className="side-link" onClick={() => onNavigate('/')}>
+          <button className="side-link" onClick={() => onNavigate('/')} aria-label="ওয়েবসাইট দেখুন" title="ওয়েবসাইট দেখুন">
             <ArrowRight size={17} /> ওয়েবসাইট দেখুন
           </button>
-          <button className="side-link signout" onClick={onLogout}>
+          <button className="side-link signout" onClick={onLogout} aria-label="লগআউট" title="লগআউট">
             <LogOut size={17} /> লগআউট
           </button>
         </div>
@@ -219,13 +225,14 @@ export default function AdminPage({
         <div className="admin-content">
           {tab === 'overview' && (
             <>
-              <div className="welcome-row">
+              <div className="welcome-row admin-welcome">
                 <div>
+                  <span className="admin-welcome-badge"><Sparkles size={14} /> শেখাই অ্যাডমিন স্টুডিও</span>
                   <h2>স্বাগতম, {user.name} 👋</h2>
                   <p>আপনার শেখাই প্ল্যাটফর্মের সারসংক্ষেপ।</p>
                 </div>
                 <button
-                  className="button button-primary"
+                  className="button button-primary admin-welcome-action"
                   onClick={() => {
                     resetCourseForm();
                     setTab('courses');
@@ -355,6 +362,19 @@ export default function AdminPage({
                   <h3>অ্যাডমিন প্রোফাইল</h3>
                   <p>আপনার নাম ও ফোন নম্বর হালনাগাদ করুন।</p>
                 </div>
+              </div>
+              <div className="admin-profile-hero">
+                <div className="admin-profile-identity">
+                  <span className="admin-profile-large-avatar">
+                    {user.name?.trim().charAt(0)?.toUpperCase() || 'A'}
+                  </span>
+                  <div>
+                    <span className="admin-profile-eyebrow"><Sparkles size={13} /> ADMIN ACCOUNT</span>
+                    <h4>{user.name}</h4>
+                    <p>{user.email}</p>
+                  </div>
+                </div>
+                <span className="admin-profile-active"><Check size={14} /> Active admin</span>
               </div>
               <form
                 onSubmit={(event) => {

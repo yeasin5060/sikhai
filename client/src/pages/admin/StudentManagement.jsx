@@ -40,12 +40,17 @@ export default function StudentManagement({ accounts, enrollments, courses }) {
             <tbody>
               {students.map((student) => (
                 <tr key={student.email}>
-                  <td>{student.name}</td>
+                  <td>
+                    <span className="admin-person-cell">
+                      <span className="admin-person-avatar">{student.name?.trim().charAt(0) || student.email.charAt(0).toUpperCase()}</span>
+                      <strong>{student.name}</strong>
+                    </span>
+                  </td>
                   <td>{student.email}</td>
                   <td className="number-display">
-                    {formatNumber(student.courseIds.length)}
+                    <span className="student-course-count">{formatNumber(student.courseIds.length)}</span>
                   </td>
-                  <td>
+                  <td className="student-courses-cell">
                     {student.courseIds
                       .map((id) => courses.find((course) => course.id === id)?.name)
                       .filter(Boolean)

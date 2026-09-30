@@ -64,7 +64,12 @@ export default function EnrollmentManagement({ accounts, enrollments, enrollment
             <tbody>
               {records.map((record, index) => (
                 <tr key={`${record.email}-${record.course.id}-${index}`}>
-                  <td>{record.studentName}</td>
+                  <td>
+                    <span className="admin-person-cell">
+                      <span className="admin-person-avatar">{record.studentName.charAt(0)}</span>
+                      <strong>{record.studentName}</strong>
+                    </span>
+                  </td>
                   <td>{record.email}</td>
                   <td>{record.course.name}</td>
                   <td>
@@ -75,7 +80,9 @@ export default function EnrollmentManagement({ accounts, enrollments, enrollment
                   <td>{formatDigits(record.course.duration)}</td>
                   <td>{record.proof?.paymentMethod ? `${record.proof.paymentMethod === 'bkash' ? 'bKash' : 'Nagad'} · ${record.proof.transactionId || '—'}` : '—'}</td>
                   <td>
-                    <span className="enrollment-status">{record.proof?.paymentStatus === 'verified' ? 'পেমেন্ট যাচাই হয়েছে' : 'যাচাই অপেক্ষমাণ'}</span>
+                    <span className={`enrollment-status${record.proof?.paymentStatus === 'verified' ? ' verified' : ''}`}>
+                      {record.proof?.paymentStatus === 'verified' ? 'পেমেন্ট যাচাই হয়েছে' : 'যাচাই অপেক্ষমাণ'}
+                    </span>
                   </td>
                 </tr>
               ))}

@@ -603,7 +603,7 @@ export default function StudentHome({
               <span className="brand-icon">
                 <GraduationCap size={21} />
               </span>
-              শিখাই<span className="brand-dot">.</span>
+              শিখাই<span className="brand-dot"></span>
             </a>
             <p>
               দক্ষতা অর্জনের সহজ পথ। বাস্তব কাজভিত্তিক কোর্স, অভিজ্ঞ মেন্টর আর
