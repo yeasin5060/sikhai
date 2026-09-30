@@ -23,6 +23,10 @@ The API listens on port `5000` by default. MongoDB must be running and reachable
 | GET | `/api/auth/me` | Signed in | Current account |
 | GET | `/api/courses` | Public | List published courses |
 | GET | `/api/courses/:id` | Public | Read a published course |
+| GET | `/api/videos` | Public | List class videos for the home page |
+| POST | `/api/videos/signature` | Admin | Create a short-lived signed video upload request |
+| POST | `/api/videos` | Admin | Save uploaded video details |
+| DELETE | `/api/videos/:id` | Admin | Delete a class video and its stored asset |
 | POST | `/api/courses` | Admin | Create a course |
 | PATCH | `/api/courses/:id` | Admin | Update a course |
 | DELETE | `/api/courses/:id` | Admin | Delete a course and its enrollments |
@@ -43,3 +47,7 @@ The Vite client uses Axios and `VITE_API_URL` (defaults to `http://localhost:500
 Create a Google OAuth 2.0 Web application client ID in Google Cloud Console. Add each frontend origin to Authorized JavaScript origins, such as `http://localhost:5173` and the exact deployed frontend origin. Enter only the scheme, host, and optional port; do not include a path or the API URL. Set `VITE_GOOGLE_CLIENT_ID` in the client environment and `GOOGLE_CLIENT_ID` in the API environment to that same client ID, then redeploy both apps. The API verifies Google's signed ID token before creating or signing in a student account. A verified Google email matching an existing student account is linked automatically; Google sign-in is not enabled for admin accounts.
 
 For Vercel, set `GOOGLE_CLIENT_ID` in the **API project's** Settings → Environment Variables for each deployment environment you use, then redeploy that project. Setting `VITE_GOOGLE_CLIENT_ID` in the client project only configures the browser button; it does not configure the API. The client deployment also sends `Cross-Origin-Opener-Policy: same-origin-allow-popups` for Google's popup flow.
+
+## Class video uploads
+
+Create a Cloudinary account and set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in the API environment (including the API Vercel project). These values enable the admin upload screen to request a signed upload and send video files directly from the browser to Cloudinary; the API secret never goes to the client. MongoDB stores video titles and delivery URLs. Keep uploaded videos at or below 100 MB. Without the Cloudinary settings, existing public video playback works, but new uploads and deletes return a configuration error.

@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import enrollmentRoutes from './routes/enrollmentRoutes.js';
+import videoRoutes from './routes/videoRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import connectDB from './db/connectDB.js';
 
@@ -51,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
+app.use('/api/videos', videoRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
