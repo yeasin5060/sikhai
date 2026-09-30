@@ -12,6 +12,7 @@ import {
   Plus,
   UserRoundCog,
   Users,
+  Video,
   X,
 } from 'lucide-react';
 import CourseTable from './CourseTable.jsx';
@@ -20,12 +21,14 @@ import StudentManagement from './StudentManagement.jsx';
 import AnalyticsPage from './AnalyticsPage.jsx';
 import EnrollmentManagement from './EnrollmentManagement.jsx';
 import CourseForm, { createEmptyCourseForm } from './CourseForm.jsx';
+import VideoManager from './VideoManager.jsx';
 import { formatNumber } from '../../utils/formatters.js';
 import api, { getApiErrorMessage } from '../../utils/api.js';
 
 const tabTitles = {
   overview: 'ড্যাশবোর্ড',
   courses: 'কোর্স ব্যবস্থাপনা',
+  videos: 'ক্লাস ভিডিও',
   students: 'শিক্ষার্থী',
   enrollments: 'ভর্তি তালিকা',
   profile: 'অ্যাডমিন প্রোফাইল',
@@ -143,6 +146,7 @@ export default function AdminPage({
   const tabs = [
     ['overview', <LayoutDashboard size={18} />, 'ড্যাশবোর্ড'],
     ['courses', <BookOpen size={18} />, 'কোর্সসমূহ', courses.length],
+    ['videos', <Video size={18} />, 'ক্লাস ভিডিও'],
     ['students', <Users size={18} />, 'শিক্ষার্থী', accounts.length],
     ['enrollments', <ClipboardList size={18} />, 'ভর্তি', enrollmentCount],
     ['analytics', <ChartNoAxesColumn size={18} />, 'পরিসংখ্যান'],
@@ -323,6 +327,8 @@ export default function AdminPage({
               />
             </section>
           )}
+
+          {tab === 'videos' && <VideoManager />}
 
           {tab === 'students' && (
             <StudentManagement

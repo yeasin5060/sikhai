@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   Clock3,
   Code2,
+  Clapperboard,
   GraduationCap,
   Heart,
   Mail,
@@ -25,6 +26,7 @@ import {
 import { formatDigits, formatNumber, formatPrice } from '../../utils/formatters.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
 import { getStudentFavorites, saveStudentFavorites } from '../../utils/storage.js';
+import api from '../../utils/api.js';
 
 export default function StudentHome({
   user,
@@ -45,6 +47,7 @@ export default function StudentHome({
 }) {
   const contentRef = useRef(null);
   const [activeHero, setActiveHero] = useState(0);
+  const [classVideos, setClassVideos] = useState([]);
   const [favorites, setFavorites] = useState(() =>
     user?.email ? getStudentFavorites(user.email).map(String) : [],
   );
@@ -56,6 +59,14 @@ export default function StudentHome({
     setFavorites(nextFavorites);
     saveStudentFavorites(user.email, nextFavorites);
   };
+
+  useEffect(() => {
+    let active = true;
+    api.get('/videos')
+      .then(({ data }) => { if (active) setClassVideos(data.videos || []); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
   const categoryOptions = [
     'সব',
     ...new Set(courses.map((course) => course.category).filter(Boolean)),
@@ -441,6 +452,39 @@ export default function StudentHome({
               <p>অন্য শব্দ দিয়ে খুঁজুন অথবা বিভাগ পরিবর্তন করে দেখুন।</p>
             </div>
           )}
+        </section>
+        <section className="section class-videos-section" id="class-videos">
+            <div className="class-videos-heading">
+              <div>
+                <span className="eyebrow"><Clapperboard size={15} /> শেখার ভিডিও</span>
+                <h2>ক্লাস দেখুন, শিখুন নিজের গতিতে</h2>
+                <p>আমাদের ক্লাসের নমুনা ভিডিও দেখে শেখার অভিজ্ঞতা সম্পর্কে জানুন।</p>
+              </div>
+              <span className="class-videos-count">{formatNumber(classVideos.length)}টি ভিডিও</span>
+            </div>
+            {classVideos.length ? (
+              <div className="class-videos-grid">
+                {classVideos.map((video) => (
+                  <article className="class-video-card" key={video.id}>
+                    <div className="class-video-player-wrap">
+                      <video src={video.videoUrl} controls preload="metadata" poster={video.thumbnailUrl} aria-label={video.title}>
+                        আপনার ব্রাউজার ভিডিও চালাতে পারছে না।
+                      </video>
+                      <span className="class-video-badge"><Clapperboard size={13} /> ক্লাস ভিডিও</span>
+                    </div>
+                    <div className="class-video-card-copy">
+                      <h3>{video.title}</h3>
+                      {video.description && <p>{video.description}</p>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="class-videos-empty">
+                <span><Clapperboard size={20} /></span>
+                <div><b>নতুন ক্লাস ভিডিও শিগগিরই আসছে</b><p>এখানে আমাদের ক্লাসের নমুনা ভিডিও দেখতে পারবেন।</p></div>
+              </div>
+            )}
         </section>
         <section id="features" className="section why-section">
           <div className="why-image">
