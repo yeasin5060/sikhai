@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const configuredApiUrl = import.meta.env.DEV
+  ? import.meta.env.VITE_API_URL?.trim()
+  : (import.meta.env.VITE_VERCEL_API_URL || import.meta.env.VITE_API_URL)?.trim();
 const configuredForLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(
   configuredApiUrl || '',
 );
@@ -26,7 +28,7 @@ export function getApiErrorMessage(error, fallback = 'Request failed. Please try
   if (!error.response) {
     return (
       error.message ||
-      'Cannot reach the API. Check VITE_API_URL and the backend deployment.'
+      'Cannot reach the API. Check VITE_VERCEL_API_URL and the backend deployment.'
     );
   }
   return fallback;
