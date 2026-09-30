@@ -19,6 +19,7 @@ The API listens on port `5000` by default. MongoDB must be running and reachable
 | GET | `/api/health` | Public | Health check |
 | POST | `/api/auth/register` | Public | Create a student account |
 | POST | `/api/auth/login` | Public | Log in and receive a JWT |
+| POST | `/api/auth/google` | Public | Verify a Google credential and sign in or create a student account |
 | GET | `/api/auth/me` | Signed in | Current account |
 | GET | `/api/courses` | Public | List published courses |
 | GET | `/api/courses/:id` | Public | Read a published course |
@@ -36,3 +37,7 @@ Send protected requests with `Authorization: Bearer <token>`. Register and login
 ## Client integration
 
 The Vite client uses Axios and `VITE_API_URL` (defaults to `http://localhost:5000/api` only in development). In the client Vercel project, set `VITE_API_URL` to the deployed server URL ending in `/api`, then redeploy the client. Set the server Vercel project's `CLIENT_ORIGIN` to the exact client origin (for example, `https://sikhai-black.vercel.app`). Existing browser accounts, courses, and enrollments are not migrated automatically; register accounts again and seed courses with the command above.
+
+## Google student sign-in
+
+Create a Google OAuth 2.0 Web application client ID in Google Cloud Console. Add the local and deployed client origins to its authorized JavaScript origins. Set `VITE_GOOGLE_CLIENT_ID` in the client environment and `GOOGLE_CLIENT_ID` in the API environment to that same client ID, then redeploy both apps. The API verifies Google's signed ID token before creating or signing in a student account. A verified Google email matching an existing student account is linked automatically; Google sign-in is not enabled for admin accounts.

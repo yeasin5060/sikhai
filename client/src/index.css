@@ -1068,6 +1068,95 @@
   margin-top: 4px;
   padding: 13px;
 }
+.google-auth-divider {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  margin-top: 22px;
+}
+.google-auth-divider > span {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #89889a;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.google-auth-divider > span::before,
+.google-auth-divider > span::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: #e9e7ef;
+}
+.google-auth-divider > div {
+  min-height: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.google-auth-unconfigured {
+  width: min(100%, 400px);
+  min-height: 58px;
+  padding: 8px 15px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid #e3e2e8;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff 0%, #fbfaff 100%);
+  color: #3c4043;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 3px 10px #28224b0a;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.google-auth-unconfigured:hover {
+  transform: translateY(-2px);
+  border-color: #c9c4dc;
+  box-shadow: 0 8px 20px #28224b14;
+}
+.google-auth-logo {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+.google-auth-copy {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+}
+.google-auth-copy strong {
+  color: #30313b;
+  font-size: 13px;
+  font-weight: 650;
+}
+.google-auth-copy small {
+  color: #89889a;
+  font-size: 11px;
+}
+.google-auth-arrow {
+  color: #777386;
+  transition: transform 180ms ease;
+}
+.google-auth-unconfigured:hover .google-auth-arrow {
+  transform: translateX(3px);
+}
+:root[data-theme='dark'] .google-auth-unconfigured {
+  border-color: #393747;
+  background: linear-gradient(135deg, #24232e 0%, #201f2a 100%);
+}
+:root[data-theme='dark'] .google-auth-copy strong {
+  color: #f0eff7;
+}
+:root[data-theme='dark'] .google-auth-divider > span::before,
+:root[data-theme='dark'] .google-auth-divider > span::after {
+  background: #393747;
+}
 .auth-switch {
   text-align: center;
   font-size: 13px;

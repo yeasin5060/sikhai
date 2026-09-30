@@ -20,7 +20,15 @@ const allowedOrigins = [
 ];
 
 app.disable('x-powered-by');
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      'script-src': ["'self'", 'https://accounts.google.com'],
+      'frame-src': ["'self'", 'https://accounts.google.com'],
+      'connect-src': ["'self'", 'https://accounts.google.com', 'https://www.googleapis.com'],
+    },
+  },
+}));
 app.use(
   cors({
     origin(origin, callback) {

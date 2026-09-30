@@ -12,7 +12,13 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: 254,
     },
-    password: { type: String, required: true, minlength: 8, select: false },
+    password: {
+      type: String,
+      required: function passwordRequired() { return !this.googleId; },
+      minlength: 8,
+      select: false,
+    },
+    googleId: { type: String, unique: true, sparse: true, select: false },
     role: { type: String, enum: ['student', 'admin'], default: 'student' },
   },
   { timestamps: true },
@@ -24,7 +30,17 @@ userSchema.pre('save', async function hashPassword() {
 });
 
 userSchema.methods.comparePassword = function comparePassword(candidate) {
+  if (!this.password) return Promise.resolve(false);
   return bcrypt.compare(candidate, this.password);
+};
+
+userSchema.statics.createGoogleStudent = function createGoogleStudent(profile) {
+  return this.create({
+    name: profile.name,
+    email: profile.email,
+    googleId: profile.googleId,
+    role: 'student',
+  });
 };
 
 export default mongoose.model('User', userSchema);
