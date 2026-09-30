@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { createVerify } from 'node:crypto';
+import { createPublicKey, createVerify } from 'node:crypto';
 import User from '../models/User.js';
 
 let googleCertificates;
@@ -37,7 +37,7 @@ async function verifyGoogleCredential(idToken) {
     throw error;
   }
 
-  if (!googleCertificates || Date.now() >= googleCertificatesExpiresAt) {
+  async function refreshGoogleCertificates() {
     const response = await fetch('https://www.googleapis.com/oauth2/v3/certs');
     if (!response.ok) throw new Error('Could not verify Google credential');
     googleCertificates = await response.json();
@@ -46,19 +46,49 @@ async function verifyGoogleCredential(idToken) {
     googleCertificatesExpiresAt = Date.now() + maxAge * 1000;
   }
 
-  const certificate = googleCertificates.keys?.find((key) => key.kid === header.kid);
+  if (!googleCertificates || Date.now() >= googleCertificatesExpiresAt) {
+    await refreshGoogleCertificates();
+  }
+
+  let signingKey = googleCertificates.keys?.find((key) => key.kid === header.kid);
+  if (!signingKey) {
+    await refreshGoogleCertificates();
+    signingKey = googleCertificates.keys?.find((key) => key.kid === header.kid);
+  }
   const signedContent = `${encodedHeader}.${encodedPayload}`;
-  const verifier = createVerify('RSA-SHA256');
-  verifier.update(signedContent);
-  verifier.end();
-  const validSignature = certificate?.x5c?.[0]
-    ? verifier.verify(`-----BEGIN CERTIFICATE-----\n${certificate.x5c[0]}\n-----END CERTIFICATE-----`, Buffer.from(signature, 'base64url'))
-    : false;
+  let validSignature = false;
+  try {
+    const publicKey = signingKey?.x5c?.[0]
+      ? createPublicKey(`-----BEGIN CERTIFICATE-----\n${signingKey.x5c[0]}\n-----END CERTIFICATE-----`)
+      : signingKey?.kty === 'RSA'
+        ? createPublicKey({ key: signingKey, format: 'jwk' })
+        : null;
+    if (publicKey) {
+      const verifier = createVerify('RSA-SHA256');
+      verifier.update(signedContent);
+      verifier.end();
+      validSignature = verifier.verify(publicKey, Buffer.from(signature, 'base64url'));
+    }
+  } catch {
+    validSignature = false;
+  }
   const audienceMatches = claims.aud === clientId ||
     (Array.isArray(claims.aud) && claims.aud.includes(clientId));
   const issuerMatches = ['accounts.google.com', 'https://accounts.google.com'].includes(claims.iss);
+  const emailVerified = claims.email_verified === true || claims.email_verified === 'true';
   if (!validSignature || !audienceMatches || !issuerMatches || claims.exp <= Date.now() / 1000 ||
-      !claims.sub || !claims.email || claims.email_verified !== true) {
+      !claims.sub || !claims.email || !emailVerified) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Google credential rejected', {
+        validSignature,
+        audienceMatches,
+        issuerMatches,
+        notExpired: claims.exp > Date.now() / 1000,
+        hasSubject: Boolean(claims.sub),
+        hasEmail: Boolean(claims.email),
+        emailVerified,
+      });
+    }
     const error = new Error('Google sign-in could not be verified');
     error.status = 401;
     throw error;
