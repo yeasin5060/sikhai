@@ -41,3 +41,5 @@ The Vite client uses Axios and `VITE_API_URL` (defaults to `http://localhost:500
 ## Google student sign-in
 
 Create a Google OAuth 2.0 Web application client ID in Google Cloud Console. Add the local and deployed client origins to its authorized JavaScript origins. Set `VITE_GOOGLE_CLIENT_ID` in the client environment and `GOOGLE_CLIENT_ID` in the API environment to that same client ID, then redeploy both apps. The API verifies Google's signed ID token before creating or signing in a student account. A verified Google email matching an existing student account is linked automatically; Google sign-in is not enabled for admin accounts.
+
+For Vercel, set `GOOGLE_CLIENT_ID` in the **API project's** Settings → Environment Variables for each deployment environment you use, then redeploy that project. Setting `VITE_GOOGLE_CLIENT_ID` in the client project only configures the browser button; it does not configure the API. The client deployment also sends `Cross-Origin-Opener-Policy: same-origin-allow-popups` for Google's popup flow.
