@@ -7052,3 +7052,74 @@ body {
   .admin-top-avatar { width: 32px; height: 32px; }
   .admin-analytics .admin-stat > b { font-size: 26px; }
 }
+
+/* ── App Loading Screen ── */
+.app-loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: linear-gradient(145deg, #f6f3ff, #eae5ff);
+  font-family: Inter, 'Noto Sans Bengali', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #6b53d8;
+  z-index: 9999;
+  animation: fadeInLoader 0.4s ease;
+}
+.app-loading::before {
+  content: '';
+  width: 48px;
+  height: 48px;
+  border: 3px solid #d9cefb;
+  border-top-color: #7254dc;
+  border-radius: 50%;
+  animation: spinLoader 0.8s linear infinite;
+}
+@keyframes spinLoader {
+  to { transform: rotate(360deg); }
+}
+@keyframes fadeInLoader {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Cursor fixes for all interactive elements ── */
+.button,
+.back-home,
+.auth-switch button,
+.student-filter,
+.favorite-button,
+.suggestion-add,
+.password-toggle,
+.text-link,
+.google-auth-unconfigured {
+  cursor: pointer;
+}
+
+/* ── Smooth page transition ── */
+#root {
+  animation: pageFadeIn 0.35s ease;
+}
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile auth: center the form better on small screens ── */
+@media (max-width: 640px) {
+  .auth-panel {
+    padding: 20px 18px;
+    justify-content: flex-start;
+  }
+  .auth-top-actions {
+    margin-bottom: 10px;
+  }
+  .auth-form-wrap {
+    width: 100%;
+    padding-top: 16px;
+  }
+}

@@ -31,10 +31,10 @@ export default function StudentDashboard({
   const [favorites, setFavorites] = useState(() =>
     getStudentFavorites(user.email).map(String),
   );
-  const enrolledCourses = courses.filter((course) => enrolledIds.includes(course.id));
+  const enrolledCourses = courses.filter((course) => enrolledIds.includes(String(course.id)));
   const favoriteCourses = courses.filter((course) => favorites.includes(String(course.id)));
   const availableCourses = courses
-    .filter((course) => !enrolledIds.includes(course.id))
+    .filter((course) => !enrolledIds.includes(String(course.id)))
     .slice(0, 3);
   const categories = new Set(enrolledCourses.map((course) => course.category)).size;
   const visibleCourses = useMemo(
@@ -212,8 +212,8 @@ export default function StudentDashboard({
                       >
                         কোর্স খুলুন <ArrowRight size={15} />
                       </button>
-                      {enrolledIds.includes(course.id) && (
-                        <button className="button button-light" onClick={() => onUnenroll(course.id)}>Cancel enrollment</button>
+                      {enrolledIds.includes(String(course.id)) && (
+                        <button className="button button-light" onClick={() => onUnenroll(course.id)}>ভর্তি বাতিল করুন</button>
                       )}
                     </div>
                   </div>

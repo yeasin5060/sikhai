@@ -155,8 +155,8 @@ function App() {
     window.history.pushState({}, '', nextPath);
     setPath(nextPath);
     setMobileNav(false);
-    if (window.lenis) window.lenis.scrollTo(0);
-    else window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const logout = () => {
