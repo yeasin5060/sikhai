@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+gsap.registerPlugin(ScrollTrigger);
 import {
   ArrowRight,
   Building2,
@@ -91,38 +93,287 @@ export default function StudentHome({
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
     const context = gsap.context(() => {
-      gsap.from('.hero-bottom', {
-        x: 72,
+      // ── Navbar entrance ──
+      gsap.from('.topbar', {
+        y: -70,
         autoAlpha: 0,
-        duration: 0.95,
+        duration: 0.7,
         ease: 'power3.out',
       });
+      gsap.from('.brand', {
+        x: -30,
+        autoAlpha: 0,
+        duration: 0.65,
+        delay: 0.15,
+        ease: 'power3.out',
+      });
+      gsap.from('.nav a', {
+        y: -18,
+        autoAlpha: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        delay: 0.2,
+        ease: 'power2.out',
+      });
+      gsap.from('.nav-actions > *', {
+        y: -18,
+        autoAlpha: 0,
+        duration: 0.5,
+        stagger: 0.07,
+        delay: 0.3,
+        ease: 'power2.out',
+      });
 
-      gsap.utils
-        .toArray(
-          '.stats-strip, .section-heading, .why-image, .why-copy, .story-card, .cta > div, .cta > a',
-        )
-        .forEach((element) => {
-          gsap.from(element, {
-            y: 30,
-            autoAlpha: 0,
-            duration: 0.7,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 88%',
-              once: true,
-            },
-          });
-        });
+      // ── Hero text reveal ──
+      gsap.from('.eyebrow', {
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.6,
+        delay: 0.45,
+        ease: 'power2.out',
+      });
+      gsap.from('.hero h1', {
+        y: 32,
+        autoAlpha: 0,
+        duration: 0.75,
+        delay: 0.55,
+        ease: 'power3.out',
+      });
+      gsap.from('.hero-copy > p', {
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.6,
+        delay: 0.68,
+        ease: 'power2.out',
+      });
+      gsap.from('.hero-actions', {
+        y: 18,
+        autoAlpha: 0,
+        duration: 0.55,
+        delay: 0.78,
+        ease: 'power2.out',
+      });
+      gsap.from('.hero-proof', {
+        y: 15,
+        autoAlpha: 0,
+        duration: 0.5,
+        delay: 0.88,
+        ease: 'power2.out',
+      });
 
-      gsap.utils.toArray('.course-card').forEach((card) => {
+      // ── Hero visual ──
+      gsap.from('.hero-visual > img', {
+        scale: 1.08,
+        autoAlpha: 0,
+        duration: 1.0,
+        delay: 0.5,
+        ease: 'power3.out',
+      });
+      gsap.from('.card-top', {
+        x: -40,
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.7,
+        delay: 0.85,
+        ease: 'back.out(1.4)',
+      });
+      gsap.from('.card-bottom', {
+        x: 40,
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.7,
+        delay: 0.95,
+        ease: 'back.out(1.4)',
+      });
+
+      // ── Hero bottom controls ──
+      gsap.from('.hero-bottom', {
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.6,
+        delay: 1.0,
+        ease: 'power2.out',
+      });
+
+      // ── Stats strip ──
+      gsap.from('.stats-strip > div', {
+        y: 28,
+        autoAlpha: 0,
+        duration: 0.55,
+        stagger: 0.1,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.stats-strip',
+          start: 'top 88%',
+          once: true,
+        },
+      });
+
+      // ── Courses section heading ──
+      gsap.from('.section-heading', {
+        y: 30,
+        autoAlpha: 0,
+        duration: 0.65,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.section-heading',
+          start: 'top 88%',
+          once: true,
+        },
+      });
+
+      // ── Course filter + search ──
+      gsap.from('.course-tools', {
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.course-tools',
+          start: 'top 90%',
+          once: true,
+        },
+      });
+
+      // ── Course cards ──
+      gsap.utils.toArray('.course-card').forEach((card, i) => {
         gsap.from(card, {
-          y: 24,
+          y: 36,
+          autoAlpha: 0,
+          duration: 0.6,
+          delay: (i % 3) * 0.08,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: card, start: 'top 93%', once: true },
+        });
+      });
+
+      // ── Class videos heading ──
+      gsap.from('.class-videos-heading', {
+        y: 28,
+        autoAlpha: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.class-videos-heading',
+          start: 'top 88%',
+          once: true,
+        },
+      });
+
+      // ── Class video cards ──
+      gsap.utils.toArray('.class-video-card').forEach((card, i) => {
+        gsap.from(card, {
+          y: 30,
           autoAlpha: 0,
           duration: 0.55,
+          delay: i * 0.1,
           ease: 'power2.out',
           scrollTrigger: { trigger: card, start: 'top 92%', once: true },
+        });
+      });
+
+      // ── Why / Features section ──
+      gsap.from('.why-image', {
+        x: -50,
+        autoAlpha: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.why-image',
+          start: 'top 85%',
+          once: true,
+        },
+      });
+      gsap.from('.why-copy', {
+        x: 50,
+        autoAlpha: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.why-copy',
+          start: 'top 85%',
+          once: true,
+        },
+      });
+      gsap.utils.toArray('.benefit').forEach((el, i) => {
+        gsap.from(el, {
+          x: 30,
+          autoAlpha: 0,
+          duration: 0.5,
+          delay: i * 0.12,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        });
+      });
+
+      // ── Testimonials ──
+      gsap.from('.center-heading', {
+        y: 28,
+        autoAlpha: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.center-heading',
+          start: 'top 88%',
+          once: true,
+        },
+      });
+      gsap.utils.toArray('.story-card').forEach((card, i) => {
+        gsap.from(card, {
+          y: 32,
+          autoAlpha: 0,
+          duration: 0.6,
+          delay: i * 0.12,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: card, start: 'top 90%', once: true },
+        });
+      });
+
+      // ── CTA section ──
+      gsap.from('.cta > div', {
+        y: 30,
+        autoAlpha: 0,
+        duration: 0.65,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.cta',
+          start: 'top 85%',
+          once: true,
+        },
+      });
+      gsap.from('.cta > a', {
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.5,
+        delay: 0.18,
+        ease: 'back.out(1.4)',
+        scrollTrigger: {
+          trigger: '.cta',
+          start: 'top 85%',
+          once: true,
+        },
+      });
+
+      // ── Footer ──
+      gsap.from('.footer-about', {
+        y: 24,
+        autoAlpha: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.footer',
+          start: 'top 90%',
+          once: true,
+        },
+      });
+      gsap.utils.toArray('.footer-column').forEach((col, i) => {
+        gsap.from(col, {
+          y: 20,
+          autoAlpha: 0,
+          duration: 0.5,
+          delay: i * 0.09,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.footer', start: 'top 90%', once: true },
         });
       });
     }, contentRef);
@@ -203,19 +454,20 @@ export default function StudentHome({
         <section className="hero" id="home" aria-roledescription="carousel" aria-label="Homepage banners">
           <div className="hero-glow glow-one" />
           <div className="hero-glow glow-two" />
-          <div
-            className="hero-carousel-track"
-            style={{
-              width: `${heroSlides.length * 100}%`,
-              transform: `translateX(-${(activeHero * 100) / heroSlides.length}%)`,
-            }}
-          >
-            {heroSlides.map((slide, index) => (
-          <div
-            className={`hero-inner hero-slide-${index + 1}`}
-            style={{ flex: `0 0 ${100 / heroSlides.length}%` }}
-            key={slide.image}
-          >
+          <div className="hero-carousel-viewport">
+            <div
+              className="hero-carousel-track"
+              style={{
+                width: `${heroSlides.length * 100}%`,
+                transform: `translateX(-${(activeHero * 100) / heroSlides.length}%)`,
+              }}
+            >
+              {heroSlides.map((slide, index) => (
+            <div
+              className={`hero-inner hero-slide-${index + 1}`}
+              style={{ flex: `0 0 ${100 / heroSlides.length}%` }}
+              key={slide.image}
+            >
             <div className="hero-copy">
               <div className="eyebrow">
                 <Sparkles size={15} /> {slide.eyebrow}
@@ -282,6 +534,7 @@ export default function StudentHome({
             </div>
           </div>
             ))}
+          </div>
           </div>
           <div className="hero-bottom">
             <span>আপনার শেখার যাত্রা শুরু হোক</span>

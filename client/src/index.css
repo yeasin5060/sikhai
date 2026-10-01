@@ -159,13 +159,17 @@
 .hero {
   position: relative;
   overflow: hidden;
-  min-height: 650px;
   padding: 62px max(calc((100vw - 1280px) / 2), 30px) 0;
   background:
     radial-gradient(ellipse at 8% 90%, #d6caff 0, transparent 33%),
     radial-gradient(ellipse at 91% 8%, #ffd8c7 0, transparent 28%),
     radial-gradient(ellipse at 65% 100%, #d2f0df 0, transparent 30%),
     linear-gradient(118deg, #f8f5ff 0%, #f0efff 53%, #fff3ec 100%);
+}
+/* Clipping wrapper so slides don't poke out vertically */
+.hero-carousel-viewport {
+  overflow: hidden;
+  width: 100%;
 }
 .hero-inner {
   position: relative;
@@ -175,7 +179,7 @@
   align-items: center;
   gap: clamp(28px, 4vw, 58px);
   max-width: 1280px;
-  min-height: 510px;
+  height: clamp(510px, 56vw, 620px);
   padding: clamp(28px, 4.5vw, 58px);
   margin: auto;
   border: 1px solid #ffffffc9;
@@ -424,7 +428,8 @@
 }
 .hero-carousel-track {
   display: flex;
-  transition: transform 900ms cubic-bezier(0.22, 0.72, 0.2, 1);
+  align-items: stretch;
+  transition: transform 800ms cubic-bezier(0.25, 0.8, 0.25, 1);
   will-change: transform;
 }
 .hero-carousel-controls {
